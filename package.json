@@ -1,0 +1,7 @@
+{
+  "name": "@hollowverse/release-manager",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "repository": "https://github.com/hollowverse/release-manager.git",
+  "license": "Unlicense"
+}
