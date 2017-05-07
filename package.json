@@ -15,7 +15,7 @@
   "commonpkg": "@hollowverse/common-config",
   "devDependencies": {
     "@hollowverse/common-config": "hollowverse/common-config",
-    "commonpkg": "^1.2.0",
+    "commonpkg": "^1.0.0",
     "husky": "^0.13.3",
     "lint-staged": "^3.4.0",
     "nodemon": "^1.11.0",
@@ -30,5 +30,8 @@
       "git add"
     ]
   },
-  "pre-commit": "lint-staged"
+  "pre-commit": "lint-staged",
+  "dependencies": {
+    "http-proxy": "^1.16.2"
+  }
 }

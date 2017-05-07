@@ -2,9 +2,15 @@
 # yarn lockfile v1
 
 
-"@hollowverse/common-config@github:hollowverse/common-config", "@hollowverse/common-config@hollowverse/common-config":
+"@hollowverse/common-config@hollowverse/common-config":
   version "1.0.6"
   resolved "https://codeload.github.com/hollowverse/common-config/tar.gz/c69dbf7cc39ff5e74e0e950df3f531d5abdac999"
+
+"@types/lodash.get@^4.4.2":
+  version "4.4.2"
+  resolved "https://registry.yarnpkg.com/@types/lodash.get/-/lodash.get-4.4.2.tgz#24d03d099d9df65656b724c38c616147ff7e2b13"
+  dependencies:
+    "@types/lodash" "*"
 
 "@types/lodash.merge@^4.6.2":
   version "4.6.2"
@@ -21,10 +27,6 @@
 "@types/lodash@*":
   version "4.14.64"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.64.tgz#979cf3a3d4a368670840bf9b3e448dc33ffe84ee"
-
-"@types/minimist@^1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@types/minimist/-/minimist-1.2.0.tgz#69a23a3ad29caf0097f06eda59b361ee2f0639f6"
 
 "@types/node@*":
   version "7.0.18"
@@ -260,19 +262,19 @@ commander@^2.9.0:
   dependencies:
     graceful-readlink ">= 1.0.0"
 
-commonpkg@^1.2.0:
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/commonpkg/-/commonpkg-1.5.0.tgz#fb252e362f2f28ae2113603bb9960d317d5b7573"
+commonpkg@^1.0.0:
+  version "1.5.2"
+  resolved "https://registry.yarnpkg.com/commonpkg/-/commonpkg-1.5.2.tgz#79d368c7b18d8a9e6ef722841015a5b5bfe9c38f"
   dependencies:
     "@hollowverse/common-config" hollowverse/common-config
+    "@types/lodash.get" "^4.4.2"
     "@types/lodash.merge" "^4.6.2"
     "@types/lodash.pick" "^4.4.2"
-    "@types/minimist" "^1.2.0"
     "@types/shelljs" "^0.7.1"
-    commonpkg "^1.2.0"
+    commonpkg "^1.0.0"
+    lodash.get "^4.4.2"
     lodash.merge "^4.6.0"
     lodash.pick "^4.4.0"
-    minimist "^1.2.0"
     shelljs "^0.7.7"
 
 concat-map@0.0.1:
@@ -432,6 +434,10 @@ event-stream@~3.3.0:
     split "0.3"
     stream-combiner "~0.0.4"
     through "~2.3.1"
+
+eventemitter3@1.x.x:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/eventemitter3/-/eventemitter3-1.2.0.tgz#1c86991d816ad1e504750e73874224ecf3bec508"
 
 execa@^0.6.0:
   version "0.6.3"
@@ -673,6 +679,13 @@ hawk@~3.1.3:
 hoek@2.x.x:
   version "2.16.3"
   resolved "https://registry.yarnpkg.com/hoek/-/hoek-2.16.3.tgz#20bb7403d3cea398e91dc4710a8ff1b8274a25ed"
+
+http-proxy@^1.16.2:
+  version "1.16.2"
+  resolved "https://registry.yarnpkg.com/http-proxy/-/http-proxy-1.16.2.tgz#06dff292952bf64dbe8471fa9df73066d4f37742"
+  dependencies:
+    eventemitter3 "1.x.x"
+    requires-port "1.x.x"
 
 http-signature@~1.1.0:
   version "1.1.1"
@@ -1008,6 +1021,10 @@ lodash.defaults@^3.1.2:
   dependencies:
     lodash.assign "^3.0.0"
     lodash.restparam "^3.0.0"
+
+lodash.get@^4.4.2:
+  version "4.4.2"
+  resolved "https://registry.yarnpkg.com/lodash.get/-/lodash.get-4.4.2.tgz#2d177f652fa31e939b4438d5341499dfa3825e99"
 
 lodash.isarguments@^3.0.0:
   version "3.1.0"
@@ -1491,6 +1508,10 @@ request@^2.81.0:
 require-from-string@^1.1.0:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/require-from-string/-/require-from-string-1.2.1.tgz#529c9ccef27380adfec9a2f965b649bbee636418"
+
+requires-port@1.x.x:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/requires-port/-/requires-port-1.0.0.tgz#925d2601d39ac485e091cf0da5c6e694dc3dcaff"
 
 resolve@^1.1.6, resolve@^1.3.2:
   version "1.3.3"
