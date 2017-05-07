@@ -1,0 +1,9 @@
+{
+  "extends": "./node_modules/@hollowverse/common-config/tsconfig",
+  "compilerOptions": {
+    "outDir": "lib"
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "name": "@hollowverse/release-manager",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "repository": "https://github.com/hollowverse/release-manager.git",
+  "description": "Release Manager of Hollowverse",
+  "license": "Unlicense",
+  "scripts": {
+    "postinstall": "commonpkg updatePackageJson",
+    "lint": "tslint '**/*.t{s,sx}' -e '**/node_modules/**' --fix",
+    "build/dev": "nodemon --exec ts-node -- src/index.ts",
+    "build": "node_modules/.bin/tsc",
+    "precommit": "lint-staged"
+  },
+  "commonpkg": "@hollowverse/common-config",
+  "devDependencies": {
+    "@hollowverse/common-config": "hollowverse/common-config",
+    "commonpkg": "^1.0.0",
+    "husky": "^0.13.3",
+    "lint-staged": "^3.4.0",
+    "nodemon": "^1.11.0",
+    "ts-node": "^3.0.3",
+    "tslint": "^5.0.0",
+    "tslint-config-standard": "^5.0.2",
+    "typescript": "^2.1.6"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "yarn lint",
+      "git add"
+    ]
+  },
+  "pre-commit": "lint-staged",
+  "dependencies": {
+    "http-proxy": "^1.16.2"
+  }
+}
