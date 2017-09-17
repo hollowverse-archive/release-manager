@@ -33,7 +33,12 @@
   ],
   "dependencies": {
     "@hollowverse/common": "https://github.com/hollowverse/common",
+    "@types/chance": "^0.7.35",
+    "@types/cookie-parser": "^1.4.1",
+    "aws-sdk": "^2.117.0",
     "body-parser": "^1.17.2",
+    "chance": "^1.0.11",
+    "cookie-parser": "^1.4.3",
     "express": "^4.15.2",
     "http-server": "^0.10.0",
     "lodash": "^4.17.4",
