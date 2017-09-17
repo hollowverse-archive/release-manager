@@ -4,9 +4,11 @@ import * as httpProxy from 'http-proxy';
 import { first } from 'lodash';
 
 import { health } from './health';
-import { routingMap, createEnvNameGenerator } from './routingMap';
+import { routingMap } from './routingMap';
+import { createEnvNameGenerator } from './getEnvName';
+import { weightsByEnvironment } from './environments';
 
-const getEnvName = createEnvNameGenerator();
+const getEnvName = createEnvNameGenerator(weightsByEnvironment);
 
 const proxyServer = httpProxy.createProxyServer();
 
