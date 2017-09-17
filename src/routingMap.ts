@@ -28,10 +28,12 @@ const distributionMap = [
   },
 ];
 
+const envNames = distributionMap.map(({ name }) => name);
+
 export const routingMap = eb
   .describeEnvironments({
     ApplicationName: 'hollowverse',
-    EnvironmentNames: distributionMap.map(({ name }) => name),
+    EnvironmentNames: envNames,
     IncludeDeleted: false,
   })
   .promise()
