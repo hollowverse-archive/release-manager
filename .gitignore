@@ -49,6 +49,7 @@ dist
 
 secrets/**/*
 !secrets/**/*.enc
+!secrets/**/*.d.ts
 
 build.zip
 

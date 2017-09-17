@@ -1,15 +1,21 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import { ElasticBeanstalk } from 'aws-sdk';
 import { cloneDeep } from 'lodash';
 import * as Chance from 'chance';
 
 const chance = new Chance();
 
-const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY } = process.env;
+const AWS_SECRET_PATH = path.join(process.cwd(), 'secrets/aws.json');
+
+const { accessKeyId, secretAccessKey } = JSON.parse(
+  fs.readFileSync(AWS_SECRET_PATH, 'utf8'),
+) as AWSSecrets;
 
 const eb = new ElasticBeanstalk({
   region: 'us-east-1',
-  accessKeyId: AWS_ACCESS_KEY_ID,
-  secretAccessKey: AWS_SECRET_ACCESS_KEY,
+  accessKeyId,
+  secretAccessKey,
 });
 
 process.on('unhandledRejection', error => {
