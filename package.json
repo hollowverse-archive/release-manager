@@ -8,11 +8,10 @@
     "test": "run-p validate-file-names lint-js lint-ts",
     "lint-js": "eslint '**/*.js{,x}'",
     "lint-ts": "tslint './*.ts' 'server/src/*.ts{,x}'",
-    "server": "node server/dist/server.js",
-    "server/dev": "nodemon --watch server/src --ext ts,tsx,json --exec 'ts-node server/src/server.ts --project ./server'",
-    "server/build": "tsc --project ./server",
-    "server/clean": "rm -rf ./server/dist",
-    "start": "run-p server/static-server server",
+    "dev": "nodemon --watch ./src --ext ts,tsx,json --exec 'ts-node src/releaseManager.ts --project ./src'",
+    "build": "tsc --project ./src",
+    "clean": "rm -rf ./dist",
+    "start": "node dist/releaseManager.js",
     "validate-file-names": "validate-file-names",
     "lint-staged": "lint-staged"
   },
@@ -33,10 +32,8 @@
   ],
   "dependencies": {
     "@hollowverse/common": "https://github.com/hollowverse/common",
-    "@types/chance": "^0.7.35",
-    "@types/cookie-parser": "^1.4.1",
+    "@types/aws-sdk": "^2.7.0",
     "aws-sdk": "^2.117.0",
-    "body-parser": "^1.17.2",
     "chance": "^1.0.11",
     "cookie-parser": "^1.4.3",
     "express": "^4.15.2",
@@ -46,7 +43,8 @@
     "shelljs": "^0.7.8"
   },
   "devDependencies": {
-    "@types/body-parser": "^1.16.4",
+    "@types/chance": "^0.7.35",
+    "@types/cookie-parser": "^1.4.1",
     "@types/express": "^4.0.36",
     "@types/http-proxy": "^1.12.0",
     "@types/lodash": "^4.14.68",

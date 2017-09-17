@@ -27,7 +27,7 @@ const secrets = [
 const ebEnvironmentName = `${PROJECT}-${BRANCH}`;
 
 async function main() {
-  const buildCommands = ['yarn test', 'yarn server/build', 'yarn client/build'];
+  const buildCommands = ['yarn test', 'yarn build'];
   const deploymentCommands = [
     () =>
       writeJsonFile('env.json', {
