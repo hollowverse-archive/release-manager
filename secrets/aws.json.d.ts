@@ -1,4 +1,4 @@
-type AWSSecrets = {
+type AwsSecrets = {
   accessKeyId: string;
   secretAccessKey: string;
 };

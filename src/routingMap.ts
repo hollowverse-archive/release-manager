@@ -10,7 +10,7 @@ const AWS_SECRET_PATH = path.join(process.cwd(), 'secrets/aws.json');
 
 const { accessKeyId, secretAccessKey } = JSON.parse(
   fs.readFileSync(AWS_SECRET_PATH, 'utf8'),
-) as AWSSecrets;
+) as AwsSecrets;
 
 const eb = new ElasticBeanstalk({
   region: 'us-east-1',
