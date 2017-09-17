@@ -61,7 +61,7 @@ async function main() {
       return undefined;
     },
     `eb use ${ebEnvironmentName}`,
-    'eb deploy --staged',
+    'eb deploy --staged --debug --timeout 15',
   ];
 
   let isDeployment = false;
