@@ -12,12 +12,6 @@
     minimatch "^3.0.4"
     shelljs "^0.7.8"
 
-"@types/aws-sdk@^2.7.0":
-  version "2.7.0"
-  resolved "https://registry.yarnpkg.com/@types/aws-sdk/-/aws-sdk-2.7.0.tgz#83588b3d14ebdca1d4ce5e023387577568ce82f3"
-  dependencies:
-    aws-sdk "*"
-
 "@types/chance@^0.7.35":
   version "0.7.35"
   resolved "https://registry.yarnpkg.com/@types/chance/-/chance-0.7.35.tgz#e76f3441b7763476c58eb7dc32f62da3d8ea547e"
@@ -326,7 +320,7 @@ autoprefixer@^7.1.2:
     postcss "^6.0.11"
     postcss-value-parser "^3.2.3"
 
-aws-sdk@*, aws-sdk@^2.117.0:
+aws-sdk@^2.117.0:
   version "2.117.0"
   resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.117.0.tgz#9fcd7a0b2293c4ec717d292cb83b621ff61253e7"
   dependencies:
