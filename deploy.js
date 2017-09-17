@@ -39,10 +39,8 @@ async function main() {
       createZipFile(
         'build.zip',
         [
-          'client/dist/**/*',
-          'server/dist/**/*',
+          'dist/**/*',
           'secrets/**/*',
-          'common/**/*',
           'yarn.lock',
           'package.json',
           'env.json',
