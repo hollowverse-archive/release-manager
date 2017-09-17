@@ -24,7 +24,7 @@ export function* createEnvNameGenerator(
     yield envName;
 
     // The environment has just been used one more time
-    cycle[envName] -= 1;
+    cycle[envName] = cycle[envName] <= 0 ? 0 : cycle[envName] - 1;
 
     if (cycle[envName] === 0) {
       delete cycle[envName];
