@@ -4,6 +4,8 @@ import { ElasticBeanstalk } from 'aws-sdk';
 import { cloneDeep } from 'lodash';
 import * as Chance from 'chance';
 
+import { setIsHealthy } from './health';
+
 const chance = new Chance();
 
 const AWS_SECRET_PATH = path.join(process.cwd(), 'secrets/aws.json');
@@ -18,9 +20,8 @@ const eb = new ElasticBeanstalk({
   secretAccessKey,
 });
 
-process.on('unhandledRejection', error => {
-  console.error('Unhandled promise rejection', error);
-  process.exit(1);
+process.on('unhandledRejection', () => {
+  setIsHealthy(false);
 });
 
 const distributionMap = [

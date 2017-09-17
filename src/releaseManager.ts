@@ -3,6 +3,7 @@ import * as cookieParser from 'cookie-parser';
 import * as httpProxy from 'http-proxy';
 import { first } from 'lodash';
 
+import { health } from './health';
 import { routingMap, createEnvNameGenerator } from './routingMap';
 
 const getEnvName = createEnvNameGenerator();
@@ -10,6 +11,8 @@ const getEnvName = createEnvNameGenerator();
 const proxyServer = httpProxy.createProxyServer();
 
 const server = express();
+
+server.use('/health', health);
 
 server.use(cookieParser());
 
