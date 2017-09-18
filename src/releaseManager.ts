@@ -39,6 +39,10 @@ server.use(async (req, res) => {
     // tslint:disable-next-line:no-http-string
     target: `https://${envUrl}`,
     changeOrigin: false,
+
+    // If set to `true`, the process will crash when validating the certificate
+    // of the environment endpoint, because that endpoint currentlu has a certificate
+    // for `hollowverse.com` instead of the original Elastic Load Balancer sub-domain.
     secure: false,
   });
 });
