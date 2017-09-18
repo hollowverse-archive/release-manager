@@ -56,7 +56,9 @@ async function main() {
         .stdout.trim()
         .split('\n');
       if (environments.indexOf(ebEnvironmentName) === -1) {
-        return executeCommand(`eb create ${ebEnvironmentName}`);
+        return executeCommand(
+          `eb create ${ebEnvironmentName} --debug --timeout 20`,
+        );
       }
       return undefined;
     },
