@@ -2,7 +2,6 @@
 
 const shelljs = require('shelljs');
 const decryptSecrets = require('@hollowverse/common/helpers/decryptSecrets');
-const executeCommand = require('@hollowverse/common/helpers/executeCommand');
 const executeCommands = require('@hollowverse/common/helpers/executeCommands');
 const writeJsonFile = require('@hollowverse/common/helpers/writeJsonFile');
 const createZipFile = require('@hollowverse/common/helpers/createZipFile');
@@ -49,19 +48,6 @@ async function main() {
         ],
         ['secrets/**/*.enc'],
       ),
-    // Use the Elastic Beanstalk environment of this branch (create it if necessary)
-    () => {
-      const environments = shelljs
-        .exec('eb list')
-        .stdout.trim()
-        .split('\n');
-      if (environments.indexOf(ebEnvironmentName) === -1) {
-        return executeCommand(
-          `eb create ${ebEnvironmentName} --debug --timeout 20`,
-        );
-      }
-      return undefined;
-    },
     `eb use ${ebEnvironmentName}`,
     'eb deploy --staged --debug --timeout 15',
   ];
@@ -73,6 +59,8 @@ async function main() {
     console.info(
       'Skipping deployment commands because some secrets are not provided',
     );
+  } else if (BRANCH !== 'master') {
+    console.info('Skipping deployment because it is not the master branch');
   } else {
     isDeployment = true;
   }
