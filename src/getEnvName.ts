@@ -7,7 +7,7 @@ const chance = new Chance();
  * request being processed, ensuring that all environments get a fair chance to
  * serve the request weighted by their assigned distribution value, while still being
  * randomized.
- * @example For the distribution map `{ beta: 1, master : 4}`, this generator guarantees that for every
+ * @example For the distribution map `{ beta: 1, master : 4 }`, this generator guarantees that for every
  * 5 new sessions, 4 of them will be served the `master` environment and 1 will be served
  * the `beta` environment. However, the order of the environments assigned to
  * one set of 5 sessions may differ from the next 5 sessions.
