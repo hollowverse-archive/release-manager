@@ -1,6 +1,5 @@
 import { eb } from './eb';
 import { envNames } from './environments';
-
 import { setIsHealthy } from './health';
 
 process.on('unhandledRejection', () => {

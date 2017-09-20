@@ -1,15 +1,11 @@
 import * as express from 'express';
-import * as cookieParser from 'cookie-parser';
 import * as httpProxy from 'http-proxy';
-import { first } from 'lodash';
-import { URL } from 'url';
 
 import { health } from './health';
-import { environmentsByUrl } from './routingMap';
-import { createEnvNameGenerator } from './getEnvName';
-import { weightsByEnvironment } from './environments';
-
-const getEnvName = createEnvNameGenerator(weightsByEnvironment);
+import { redirectToHttps } from './redirectToHttps';
+import { testInternalBuilds } from './testInternalBuilds';
+import { testProductionEnvironments } from './testProductionEnvironments';
+import { ExtendedRequest } from './typings/extendedRequest';
 
 const proxyServer = httpProxy.createProxyServer();
 
@@ -17,43 +13,16 @@ const server = express();
 
 server.use('/health', health);
 
-// Redirect HTTP requests to HTTPS
-server.use((req, res, next) => {
-  const protocol = req.header('X-FORWARDED-PROTO');
-  const host = req.header('Host') || 'hollowverse.com';
-  if (protocol === 'http') {
-    const newURL = new URL(req.url, `https://${host}`);
-    res.redirect(newURL.toString());
-  } else {
-    next();
-  }
-});
+server.use(redirectToHttps);
 
-server.use(cookieParser());
+server.use(testInternalBuilds);
 
-server.use(async (req, res) => {
-  const map = await environmentsByUrl;
-  let envName: string | undefined = req.cookies.env;
-  let envUrl: string | undefined;
-  if (!envName || map.get(envName) === undefined) {
-    envName = getEnvName.next().value;
-  }
+server.use(testProductionEnvironments);
 
-  // Get the URL from the routing map, falling back to first environment
-  // if the environment is defined but does not have a URL
-  envUrl = map.get(envName);
-  if (!envUrl) {
-    envName = first(Array.from(map.keys())) as string;
-    envUrl = map.get(envName);
-  }
-
-  res.cookie('env', envName, {
-    maxAge: 24 * 60 * 60 * 1000,
-  });
-
+server.use((req, res) => {
   proxyServer.web(req, res, {
     // tslint:disable-next-line:no-http-string
-    target: `https://${envUrl}`,
+    target: `https://${(req as ExtendedRequest).envUrl}`,
     changeOrigin: false,
 
     // If set to `true`, the process will crash when validating the certificate
