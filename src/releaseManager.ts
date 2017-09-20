@@ -5,7 +5,7 @@ import { first } from 'lodash';
 import { URL } from 'url';
 
 import { health } from './health';
-import { routingMap } from './routingMap';
+import { environmentsByUrl } from './routingMap';
 import { createEnvNameGenerator } from './getEnvName';
 import { weightsByEnvironment } from './environments';
 
@@ -32,7 +32,7 @@ server.use((req, res, next) => {
 server.use(cookieParser());
 
 server.use(async (req, res) => {
-  const map = await routingMap;
+  const map = await environmentsByUrl;
   let envName: string | undefined = req.cookies.env;
   let envUrl: string | undefined;
   if (!envName || map.get(envName) === undefined) {
