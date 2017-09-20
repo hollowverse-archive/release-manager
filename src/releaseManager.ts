@@ -2,6 +2,7 @@ import * as express from 'express';
 import * as cookieParser from 'cookie-parser';
 import * as httpProxy from 'http-proxy';
 import { first } from 'lodash';
+import { URL } from 'url';
 
 import { health } from './health';
 import { routingMap } from './routingMap';
@@ -15,6 +16,18 @@ const proxyServer = httpProxy.createProxyServer();
 const server = express();
 
 server.use('/health', health);
+
+// Redirect HTTP requests to HTTPS
+server.use((req, res, next) => {
+  const protocol = req.header('X-FORWARDED-PROTO');
+  const host = req.header('Host') || 'hollowverse.com';
+  if (protocol === 'http') {
+    const newURL = new URL(req.url, `https://${host}`);
+    res.redirect(newURL.toString());
+  } else {
+    next();
+  }
+});
 
 server.use(cookieParser());
 
@@ -39,6 +52,8 @@ server.use(async (req, res) => {
     // tslint:disable-next-line:no-http-string
     target: `https://${envUrl}`,
     changeOrigin: false,
+    toProxy: true,
+    protocolRewrite: 'https',
 
     // If set to `true`, the process will crash when validating the certificate
     // of the environment endpoint, because that endpoint currently has a certificate
