@@ -2,7 +2,7 @@ import * as express from 'express';
 import * as cookieParser from 'cookie-parser';
 import { first } from 'lodash';
 
-import { environmentsByUrl } from './routingMap';
+import { environmentsByUrl } from './environmentsByUrl';
 import { createEnvNameGenerator } from './getEnvName';
 import { weightsByEnvironment } from './environments';
 import { ExtendedRequest } from './typings/extendedRequest';
