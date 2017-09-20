@@ -9,7 +9,7 @@ export const setIsHealthy = (value: boolean) => {
 const health = express();
 
 health.get('/', (_, res) => {
-  res.status(setIsHealthy ? 200 : 500).send();
+  res.status(isHealthy ? 200 : 500).send();
 });
 
 export { health };
