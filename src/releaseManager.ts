@@ -52,8 +52,6 @@ server.use(async (req, res) => {
     // tslint:disable-next-line:no-http-string
     target: `https://${envUrl}`,
     changeOrigin: false,
-    toProxy: true,
-    protocolRewrite: 'https',
 
     // If set to `true`, the process will crash when validating the certificate
     // of the environment endpoint, because that endpoint currently has a certificate
