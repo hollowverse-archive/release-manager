@@ -47,7 +47,10 @@ server.use(async (req, res) => {
     envUrl = map.get(envName);
   }
 
-  res.cookie('env', envName);
+  res.cookie('env', envName, {
+    maxAge: 24 * 60 * 60 * 1000,
+  });
+
   proxyServer.web(req, res, {
     // tslint:disable-next-line:no-http-string
     target: `https://${envUrl}`,
