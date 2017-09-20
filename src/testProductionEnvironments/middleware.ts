@@ -5,7 +5,7 @@ import { first } from 'lodash';
 import { environmentsByUrl } from './environmentsByUrl';
 import { createEnvNameGenerator } from './getEnvName';
 import { weightsByEnvironment } from './environments';
-import { ExtendedRequest } from './typings/extendedRequest';
+import { ExtendedRequest } from '../typings/extendedRequest';
 
 const getEnvName = createEnvNameGenerator(weightsByEnvironment);
 

@@ -1,11 +1,15 @@
 import * as express from 'express';
 import * as httpProxy from 'http-proxy';
 
-import { health } from './health';
+import { health, setIsHealthy } from './health';
 import { redirectToHttps } from './redirectToHttps';
 import { testInternalBuilds } from './testInternalBuilds';
-import { testProductionEnvironments } from './testProductionEnvironments';
+import { testProductionEnvironments } from './testProductionEnvironments/middleware';
 import { ExtendedRequest } from './typings/extendedRequest';
+
+process.on('unhandledRejection', () => {
+  setIsHealthy(false);
+});
 
 const proxyServer = httpProxy.createProxyServer();
 
