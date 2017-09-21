@@ -12,4 +12,5 @@ export const eb = new ElasticBeanstalk({
   region: 'us-east-1',
   accessKeyId,
   secretAccessKey,
+  apiVersion: '2010-12-01',
 });
