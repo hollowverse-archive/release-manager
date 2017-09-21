@@ -20,7 +20,7 @@ server.use('/health', health);
 
 server.use(redirectToHttps);
 
-testProductionEnvironments.use(cookieParser());
+server.use(cookieParser());
 
 server.use(testInternalBuilds);
 
