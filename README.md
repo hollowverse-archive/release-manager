@@ -1,5 +1,6 @@
 Release Manager
 ===================
+[![Build Status](https://travis-ci.org/hollowverse/release-manager.svg?branch=master)](https://travis-ci.org/hollowverse/release-manager)
 
 Release Manager routes new sessions on https://hollowverse.com to different versions of the website in order to test code changes in a production environment on a small percentage of sessions before the changes land on `master`.
 
