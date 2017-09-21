@@ -8,7 +8,7 @@
     "test": "run-p validate-file-names lint-js lint-ts",
     "lint-js": "eslint '**/*.js{,x}'",
     "lint-ts": "tslint './*.ts' 'server/src/*.ts{,x}'",
-    "dev": "nodemon --watch ./src --ext ts,tsx,json --exec 'ts-node src/releaseManager.ts --project ./src'",
+    "dev": "PORT=8080 nodemon --watch ./src --ext ts,tsx,json --exec 'ts-node src/releaseManager.ts --project ./src'",
     "build": "tsc --project ./src",
     "clean": "rm -rf ./dist",
     "start": "node dist/releaseManager.js",

@@ -1,5 +1,6 @@
 import * as express from 'express';
 import * as httpProxy from 'http-proxy';
+import * as cookieParser from 'cookie-parser';
 
 import { health, setIsHealthy } from './health';
 import { redirectToHttps } from './redirectToHttps';
@@ -19,6 +20,8 @@ server.use('/health', health);
 
 server.use(redirectToHttps);
 
+testProductionEnvironments.use(cookieParser());
+
 server.use(testInternalBuilds);
 
 server.use(testProductionEnvironments);
@@ -36,4 +39,4 @@ server.use((req, res) => {
   });
 });
 
-server.listen(process.env.PORT || 8080);
+server.listen(process.env.PORT);
