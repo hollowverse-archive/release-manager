@@ -1,7 +1,6 @@
 import * as express from 'express';
 import * as cookieParser from 'cookie-parser';
 import * as httpProxy from 'http-proxy';
-import { first } from 'lodash';
 import { URL } from 'url';
 
 import { health } from './health';
@@ -43,7 +42,7 @@ server.use(async (req, res) => {
   // if the environment is defined but does not have a URL
   envUrl = map.get(envName);
   if (!envUrl) {
-    envName = first(Array.from(map.keys())) as string;
+    envName = map.keys().next().value;
     envUrl = map.get(envName);
   }
 
