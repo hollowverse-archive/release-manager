@@ -5,8 +5,8 @@ import { noop } from 'lodash';
 
 import { health, setIsHealthy } from './health';
 import { redirectToHttps } from './redirectToHttps';
-import { getEnvFromQueryString } from './branchPreviewer/getEnvFromQueryString';
-import { getEnvFromCookie } from './trafficSplitter/getEnvFromCookie';
+import { getEnvForBranchPreview } from './branchPreviewer/getEnvForBranchPreview';
+import { getEnvForTrafficSplitting } from './trafficSplitter/getEnvForTrafficSplitting';
 
 process.on('unhandledRejection', () => {
   setIsHealthy(false);
@@ -22,24 +22,29 @@ server.use(redirectToHttps);
 
 server.use(cookieParser());
 
-const envCookieName = 'env';
+const trafficSplittingCookieName = 'env';
+const branchPreviewCookieName = 'branch';
 
 server.use(async (req, res) => {
   let endpoint: string | undefined;
 
-  const { branch } = req.query;
+  const branch = req.query.branch || req.cookies[branchPreviewCookieName];
   if (branch) {
-    const env = await getEnvFromQueryString(branch).catch(noop);
+    const env = await getEnvForBranchPreview(branch).catch(noop);
     if (env) {
-      res.clearCookie(envCookieName);
+      res.cookie(branchPreviewCookieName, env.name, {
+        maxAge: 24 * 60 * 60 * 1000,
+      });
       endpoint = env.url;
     }
   }
 
   if (!endpoint) {
-    const env = await getEnvFromCookie(req.cookies[envCookieName]);
+    const env = await getEnvForTrafficSplitting(
+      req.cookies[trafficSplittingCookieName],
+    );
     endpoint = env.url;
-    res.cookie('env', env.name, {
+    res.cookie(trafficSplittingCookieName, env.name, {
       maxAge: 24 * 60 * 60 * 1000,
     });
   }

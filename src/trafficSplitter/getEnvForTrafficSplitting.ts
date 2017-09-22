@@ -5,7 +5,7 @@ import { EnvDetails } from '../typings/environments';
 
 const getEnvName = createRandomEnvNameGenerator(weightsByEnvironment);
 
-const getEnvFromCookie = async (
+const getEnvForTrafficSplitting = async (
   envName: string | undefined,
 ): Promise<EnvDetails> => {
   let envUrl;
@@ -26,4 +26,4 @@ const getEnvFromCookie = async (
   return { name: envName, url: envUrl };
 };
 
-export { getEnvFromCookie };
+export { getEnvForTrafficSplitting };

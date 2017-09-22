@@ -1,7 +1,7 @@
 import { EnvDetails } from '../typings/environments';
 import { eb } from '../eb';
 
-const getEnvFromQueryString = async (
+const getEnvForBranchPreview = async (
   branch: string,
 ): Promise<EnvDetails | undefined> => {
   const { Environments } = await eb
@@ -26,4 +26,4 @@ const getEnvFromQueryString = async (
   return undefined;
 };
 
-export { getEnvFromQueryString };
+export { getEnvForBranchPreview };
