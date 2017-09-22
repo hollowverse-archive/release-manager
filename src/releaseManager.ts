@@ -4,9 +4,8 @@ import * as cookieParser from 'cookie-parser';
 
 import { health, setIsHealthy } from './health';
 import { redirectToHttps } from './redirectToHttps';
-import { testInternalBuilds } from './testInternalBuilds';
-import { testProductionEnvironments } from './testProductionEnvironments/middleware';
-import { ExtendedRequest } from './typings/extendedRequest';
+import { getEnvFromQueryString } from './branchPreviewer/getEnvFromQueryString';
+import { getEnvFromCookie } from './trafficSplitter/getEnvFromCookie';
 
 process.on('unhandledRejection', () => {
   setIsHealthy(false);
@@ -22,14 +21,29 @@ server.use(redirectToHttps);
 
 server.use(cookieParser());
 
-server.use(testInternalBuilds);
+server.use(async (req, res) => {
+  let target: string | undefined;
 
-server.use(testProductionEnvironments);
+  const { branch } = req.query;
+  if (branch) {
+    const env = await getEnvFromQueryString(branch);
+    if (env) {
+      req.clearCookie('env');
+      target = env.url;
+    }
+  }
 
-server.use((req, res) => {
+  if (!target) {
+    const env = await getEnvFromCookie(req);
+    target = env.url;
+    res.cookie('env', env.name, {
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+  }
+
   proxyServer.web(req, res, {
     // tslint:disable-next-line:no-http-string
-    target: `https://${(req as ExtendedRequest).envUrl}`,
+    target: `https://${target}`,
     changeOrigin: false,
 
     // If set to `true`, the process will crash when validating the certificate
