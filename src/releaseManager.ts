@@ -23,20 +23,20 @@ server.use(redirectToHttps);
 server.use(cookieParser());
 
 server.use(async (req, res) => {
-  let target: string | undefined;
+  let endpoint: string | undefined;
 
   const { branch } = req.query;
   if (branch) {
     const env = await getEnvFromQueryString(branch).catch(noop);
     if (env) {
       res.clearCookie('env');
-      target = env.url;
+      endpoint = env.url;
     }
   }
 
-  if (!target) {
+  if (!endpoint) {
     const env = await getEnvFromCookie(req.cookies.env);
-    target = env.url;
+    endpoint = env.url;
     res.cookie('env', env.name, {
       maxAge: 24 * 60 * 60 * 1000,
     });
@@ -44,7 +44,7 @@ server.use(async (req, res) => {
 
   proxyServer.web(req, res, {
     // tslint:disable-next-line:no-http-string
-    target: `https://${target}`,
+    target: `https://${endpoint}`,
     changeOrigin: false,
 
     // If set to `true`, the process will crash when validating the certificate
