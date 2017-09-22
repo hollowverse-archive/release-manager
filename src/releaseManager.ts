@@ -35,7 +35,7 @@ server.use(async (req, res) => {
   }
 
   if (!target) {
-    const env = await getEnvFromCookie(req);
+    const env = await getEnvFromCookie(req.cookies.env);
     target = env.url;
     res.cookie('env', env.name, {
       maxAge: 24 * 60 * 60 * 1000,

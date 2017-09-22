@@ -1,5 +1,3 @@
-import { Request } from 'express';
-
 import { urlsByEnvironment } from './urlsByEnvironment';
 import { createRandomEnvNameGenerator } from './getRandomEnvName';
 import { weightsByEnvironment } from './environments';
@@ -7,8 +5,9 @@ import { EnvDetails } from '../typings/environments';
 
 const getEnvName = createRandomEnvNameGenerator(weightsByEnvironment);
 
-const getEnvFromCookie = async (req: Request): Promise<EnvDetails> => {
-  let envName: string | undefined = req.cookies.env;
+const getEnvFromCookie = async (
+  envName: string | undefined,
+): Promise<EnvDetails> => {
   let envUrl;
 
   const map = await urlsByEnvironment;
