@@ -5,6 +5,12 @@ import { EnvDetails } from '../typings/environments';
 
 const getEnvName = createRandomEnvNameGenerator(weightsByEnvironment);
 
+/**
+ * For a possible environment name (e.g. read from a cookie), this function
+ * first tries to find the URL for the given environment and falls back to
+ * a random environment if that fails. The returned object includes the name
+ * and the URL of the final environment.
+ */
 const getEnvForTrafficSplitting = async (
   envName: string | undefined,
 ): Promise<EnvDetails> => {
