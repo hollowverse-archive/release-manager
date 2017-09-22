@@ -1,4 +1,6 @@
-FROM node:latest
+FROM node:alpine
+
+RUN apk update && apk add git
 
 ENV NODE_ENV=production
 ENV PORT=8080
