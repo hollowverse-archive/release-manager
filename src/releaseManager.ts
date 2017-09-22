@@ -22,6 +22,8 @@ server.use(redirectToHttps);
 
 server.use(cookieParser());
 
+const envCookieName = 'env';
+
 server.use(async (req, res) => {
   let endpoint: string | undefined;
 
@@ -29,13 +31,13 @@ server.use(async (req, res) => {
   if (branch) {
     const env = await getEnvFromQueryString(branch).catch(noop);
     if (env) {
-      res.clearCookie('env');
+      res.clearCookie(envCookieName);
       endpoint = env.url;
     }
   }
 
   if (!endpoint) {
-    const env = await getEnvFromCookie(req.cookies.env);
+    const env = await getEnvFromCookie(req.cookies[envCookieName]);
     endpoint = env.url;
     res.cookie('env', env.name, {
       maxAge: 24 * 60 * 60 * 1000,
