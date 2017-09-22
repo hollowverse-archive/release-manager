@@ -1,6 +1,6 @@
 import * as express from 'express';
 
-import { environmentsByUrl } from './environmentsByUrl';
+import { urlsByEnvironment } from './urlsByEnvironment';
 import { createEnvNameGenerator } from './getEnvName';
 import { weightsByEnvironment } from './environments';
 import { ExtendedRequest } from '../typings/extendedRequest';
@@ -13,7 +13,7 @@ testProductionEnvironments.use(async (req, res, next) => {
   try {
     // Skip if request has already been assigned a test environment
     if (!(req as ExtendedRequest).envUrl) {
-      const map = await environmentsByUrl;
+      const map = await urlsByEnvironment;
       let envName: string | undefined = req.cookies.env;
       let envUrl: string | undefined;
       if (!envName || map.get(envName) === undefined) {

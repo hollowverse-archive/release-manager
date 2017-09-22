@@ -1,7 +1,7 @@
 import { eb } from '../eb';
 import { envNames } from './environments';
 
-export const environmentsByUrl = eb
+export const urlsByEnvironment = eb
   .describeEnvironments({
     ApplicationName: 'hollowverse',
     EnvironmentNames: envNames,
