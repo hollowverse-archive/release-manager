@@ -1,6 +1,7 @@
 import * as express from 'express';
 import * as httpProxy from 'http-proxy';
 import * as cookieParser from 'cookie-parser';
+import { noop } from 'lodash';
 
 import { health, setIsHealthy } from './health';
 import { redirectToHttps } from './redirectToHttps';
@@ -26,9 +27,9 @@ server.use(async (req, res) => {
 
   const { branch } = req.query;
   if (branch) {
-    const env = await getEnvFromQueryString(branch);
+    const env = await getEnvFromQueryString(branch).catch(noop);
     if (env) {
-      req.clearCookie('env');
+      res.clearCookie('env');
       target = env.url;
     }
   }
