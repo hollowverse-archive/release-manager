@@ -26,7 +26,7 @@ const trafficSplittingCookieName = 'env';
 const branchPreviewCookieName = 'branch';
 
 server.use(async (req, res) => {
-  let endpoint: string | undefined;
+  let url: string | undefined;
 
   const branch = req.query.branch || req.cookies[branchPreviewCookieName];
   if (branch) {
@@ -35,15 +35,15 @@ server.use(async (req, res) => {
       res.cookie(branchPreviewCookieName, env.name, {
         maxAge: 2 * 60 * 60 * 1000,
       });
-      endpoint = env.url;
+      url = env.url;
     }
   }
 
-  if (!endpoint) {
+  if (!url) {
     const env = await getEnvForTrafficSplitting(
       req.cookies[trafficSplittingCookieName],
     );
-    endpoint = env.url;
+    url = env.url;
     res.cookie(trafficSplittingCookieName, env.name, {
       maxAge: 24 * 60 * 60 * 1000,
     });
@@ -51,7 +51,7 @@ server.use(async (req, res) => {
 
   proxyServer.web(req, res, {
     // tslint:disable-next-line:no-http-string
-    target: `https://${endpoint}`,
+    target: `https://${url}`,
     changeOrigin: false,
 
     // If set to `true`, the process will crash when validating the certificate
