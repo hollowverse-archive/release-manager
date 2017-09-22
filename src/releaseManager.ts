@@ -33,7 +33,7 @@ server.use(async (req, res) => {
     const env = await getEnvForBranchPreview(branch).catch(noop);
     if (env) {
       res.cookie(branchPreviewCookieName, env.name, {
-        maxAge: 24 * 60 * 60 * 1000,
+        maxAge: 2 * 60 * 60 * 1000,
       });
       endpoint = env.url;
     }
