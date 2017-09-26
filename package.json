@@ -7,7 +7,7 @@
   "scripts": {
     "test": "run-p validate-file-names lint-js lint-ts",
     "lint-js": "eslint '**/*.js{,x}'",
-    "lint-ts": "tslint './*.ts' 'server/src/*.ts{,x}'",
+    "lint-ts": "tslint './*.ts' 'src/**/*.ts{,x}' --project .",
     "dev": "PORT=8080 nodemon --watch ./src --ext ts,tsx,json --exec 'ts-node src/releaseManager.ts --project ./src'",
     "build": "tsc --project ./src",
     "clean": "rm -rf ./dist",
@@ -20,6 +20,7 @@
   "lint-staged": {
     "**/*.{j,t}s{x,}": [
       "prettier --write --single-quote --trailing-comma all",
+      "tslint --project .",
       "git add"
     ],
     "**/*.js{x,}": [
