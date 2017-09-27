@@ -1,10 +1,11 @@
 import { eb } from '../eb';
 import { envNames } from './environments';
+import { prefix, unprefix } from '../helpers/prefix';
 
 export const urlsByEnvironment = eb
   .describeEnvironments({
     ApplicationName: 'hollowverse',
-    EnvironmentNames: envNames,
+    EnvironmentNames: envNames.map(prefix),
     IncludeDeleted: false,
   })
   .promise()
@@ -12,7 +13,8 @@ export const urlsByEnvironment = eb
     // tslint:disable no-non-null-assertion
     return new Map(
       Environments!.map(
-        env => [env.EnvironmentName!, env.EndpointURL!] as [string, string],
+        env =>
+          [unprefix(env.EnvironmentName!), env.EndpointURL] as [string, string],
       ),
     );
     // tslint:enable no-non-null-assertion

@@ -1,5 +1,6 @@
 import { EnvDetails } from '../typings/environments';
 import { eb } from '../eb';
+import { prefix, unprefix } from '../helpers/prefix';
 
 /** 
  * For a given branch name (e.g. read from a cookie or query string), this function
@@ -14,7 +15,7 @@ const getEnvForBranchPreview = async (
     .describeEnvironments({
       ApplicationName: 'hollowverse',
       IncludeDeleted: false,
-      EnvironmentNames: [`hollowverse-${branch}`],
+      EnvironmentNames: [prefix(branch)],
     })
     .promise();
 
@@ -23,7 +24,7 @@ const getEnvForBranchPreview = async (
 
     // tslint:disable:no-non-null-assertion
     return {
-      name: env.EnvironmentName!,
+      name: unprefix(env.EnvironmentName!),
       url: env.EndpointURL!,
     };
     // tslint:enable:no-non-null-assertion
