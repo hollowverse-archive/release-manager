@@ -7,6 +7,7 @@ import { health, setIsHealthy } from './health';
 import { redirectToHttps } from './redirectToHttps';
 import { getEnvForBranchPreview } from './branchPreviewer/getEnvForBranchPreview';
 import { getEnvForTrafficSplitting } from './trafficSplitter/getEnvForTrafficSplitting';
+import { EnvDetails } from './typings/environments.d';
 
 process.on('unhandledRejection', () => {
   setIsHealthy(false);
@@ -26,32 +27,34 @@ const trafficSplittingCookieName = 'env';
 const branchPreviewCookieName = 'branch';
 
 server.use(async (req, res) => {
-  let url: string | undefined;
+  let env: EnvDetails | void;
 
   const branch = req.query.branch || req.cookies[branchPreviewCookieName];
   if (branch) {
-    const env = await getEnvForBranchPreview(branch).catch(noop);
+    env = await getEnvForBranchPreview(branch).catch(noop);
     if (env) {
       res.cookie(branchPreviewCookieName, env.name, {
         maxAge: 2 * 60 * 60 * 1000,
       });
-      url = env.url;
+    } else {
+      res.clearCookie(branchPreviewCookieName);
     }
   }
 
-  if (!url) {
-    const env = await getEnvForTrafficSplitting(
+  if (!env || !env.url) {
+    env = await getEnvForTrafficSplitting(
       req.cookies[trafficSplittingCookieName],
     );
-    url = env.url;
     res.cookie(trafficSplittingCookieName, env.name, {
       maxAge: 24 * 60 * 60 * 1000,
     });
   }
 
+  res.setHeader('X-Hollowverse-Release-Manager-Target', env.name);
+
   proxyServer.web(req, res, {
     // tslint:disable-next-line:no-http-string
-    target: `https://${url}`,
+    target: `https://${env.url}`,
     changeOrigin: false,
 
     // If set to `true`, the process will crash when validating the certificate
