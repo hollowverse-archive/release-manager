@@ -31,6 +31,8 @@ server.use(async (req, res) => {
 
   const branch = req.query.branch || req.cookies[branchPreviewCookieName];
   if (branch) {
+    res.setHeader('X-Hollowverse-Requested-Environment', branch);
+
     env = await getEnvForBranchPreview(branch).catch(noop);
     if (env) {
       res.cookie(branchPreviewCookieName, env.name, {
@@ -50,7 +52,7 @@ server.use(async (req, res) => {
     });
   }
 
-  res.setHeader('X-Hollowverse-Release-Manager-Target', env.name);
+  res.setHeader('X-Hollowverse-Resolved-Environment', env.name);
 
   proxyServer.web(req, res, {
     // tslint:disable-next-line:no-http-string
