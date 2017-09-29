@@ -12,7 +12,7 @@ const chance = new Chance();
  * the `beta` environment. However, the order of the environments assigned to
  * one set of 5 sessions may differ from the next 5 sessions.
  */
-export function* createEnvNameGenerator(
+export function* createRandomEnvNameGenerator(
   weightsByEnvironment: Record<string, number>,
 ) {
   let cycle = { ...weightsByEnvironment };

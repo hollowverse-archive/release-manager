@@ -1,14 +1,17 @@
 import * as express from 'express';
-import * as cookieParser from 'cookie-parser';
 import * as httpProxy from 'http-proxy';
-import { URL } from 'url';
+import * as cookieParser from 'cookie-parser';
+import { noop } from 'lodash';
 
-import { health } from './health';
-import { environmentsByUrl } from './routingMap';
-import { createEnvNameGenerator } from './getEnvName';
-import { weightsByEnvironment } from './environments';
+import { health, setIsHealthy } from './health';
+import { redirectToHttps } from './redirectToHttps';
+import { getEnvForBranchPreview } from './branchPreviewer/getEnvForBranchPreview';
+import { getEnvForTrafficSplitting } from './trafficSplitter/getEnvForTrafficSplitting';
+import { EnvDetails } from './typings/environments.d';
 
-const getEnvName = createEnvNameGenerator(weightsByEnvironment);
+process.on('unhandledRejection', () => {
+  setIsHealthy(false);
+});
 
 const proxyServer = httpProxy.createProxyServer();
 
@@ -16,43 +19,44 @@ const server = express();
 
 server.use('/health', health);
 
-// Redirect HTTP requests to HTTPS
-server.use((req, res, next) => {
-  const protocol = req.header('X-FORWARDED-PROTO');
-  const host = req.header('Host') || 'hollowverse.com';
-  if (protocol === 'http') {
-    const newURL = new URL(req.url, `https://${host}`);
-    res.redirect(newURL.toString());
-  } else {
-    next();
-  }
-});
+server.use(redirectToHttps);
 
 server.use(cookieParser());
 
+const trafficSplittingCookieName = 'env';
+const branchPreviewCookieName = 'branch';
+
 server.use(async (req, res) => {
-  const map = await environmentsByUrl;
-  let envName: string | undefined = req.cookies.env;
-  let envUrl: string | undefined;
-  if (!envName || map.get(envName) === undefined) {
-    envName = getEnvName.next().value;
+  let env: EnvDetails | void;
+
+  const branch = req.query.branch || req.cookies[branchPreviewCookieName];
+  if (branch) {
+    res.setHeader('X-Hollowverse-Requested-Environment', branch);
+
+    env = await getEnvForBranchPreview(branch).catch(noop);
+    if (env) {
+      res.cookie(branchPreviewCookieName, env.name, {
+        maxAge: 2 * 60 * 60 * 1000,
+      });
+    } else {
+      res.clearCookie(branchPreviewCookieName);
+    }
   }
 
-  // Get the URL from the routing map, falling back to first environment
-  // if the environment is defined but does not have a URL
-  envUrl = map.get(envName);
-  if (!envUrl) {
-    envName = map.keys().next().value;
-    envUrl = map.get(envName);
+  if (!env || !env.url) {
+    env = await getEnvForTrafficSplitting(
+      req.cookies[trafficSplittingCookieName],
+    );
+    res.cookie(trafficSplittingCookieName, env.name, {
+      maxAge: 24 * 60 * 60 * 1000,
+    });
   }
 
-  res.cookie('env', envName, {
-    maxAge: 24 * 60 * 60 * 1000,
-  });
+  res.setHeader('X-Hollowverse-Resolved-Environment', env.name);
 
   proxyServer.web(req, res, {
     // tslint:disable-next-line:no-http-string
-    target: `https://${envUrl}`,
+    target: `https://${env.url}`,
     changeOrigin: false,
 
     // If set to `true`, the process will crash when validating the certificate
