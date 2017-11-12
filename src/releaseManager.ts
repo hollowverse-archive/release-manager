@@ -1,6 +1,7 @@
 import * as express from 'express';
 import * as httpProxy from 'http-proxy';
 import * as cookieParser from 'cookie-parser';
+import * as helmet from 'helmet';
 import { noop } from 'lodash';
 
 import { health, setIsHealthy } from './health';
@@ -20,6 +21,8 @@ const server = express();
 server.use('/health', health);
 
 server.use(redirectToHttps);
+
+server.use(helmet.hidePoweredBy());
 
 server.use(cookieParser());
 
