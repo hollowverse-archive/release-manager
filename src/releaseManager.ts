@@ -40,6 +40,8 @@ server.use(async (req, res) => {
     if (env) {
       res.cookie(branchPreviewCookieName, env.name, {
         maxAge: 2 * 60 * 60 * 1000,
+        httpOnly: true,
+        secure: true,
       });
     } else {
       res.clearCookie(branchPreviewCookieName);
@@ -52,6 +54,8 @@ server.use(async (req, res) => {
     );
     res.cookie(trafficSplittingCookieName, env.name, {
       maxAge: 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      secure: true,
     });
   }
 
