@@ -2,13 +2,15 @@
   "name": "release-manager",
   "version": "1.0.0",
   "private": true,
-  "description": "Release Manager provides cookie-based traffic splitting for hollowverse.com",
+  "description":
+    "Release Manager provides cookie-based traffic splitting for hollowverse.com",
   "repository": "https://github.com/hollowverse/release-manager.git",
   "scripts": {
     "test": "run-p validate-file-names lint-js lint-ts",
     "lint-js": "eslint '**/*.js{,x}'",
     "lint-ts": "tslint './*.ts' 'src/**/*.ts{,x}' --project .",
-    "dev": "PORT=${RELEASE_MANAGER_PORT:-8082} node --inspect=0.0.0.0:${RELEASE_MANAGER_DEBUG_PORT:-9228} -r 'ts-node/register' src/releaseManager.ts",
+    "dev":
+      "PORT=${RELEASE_MANAGER_PORT:-8082} node --inspect=0.0.0.0:${RELEASE_MANAGER_DEBUG_PORT:-9228} -r 'ts-node/register' src/releaseManager.ts",
     "dev:watch": "nodemon --watch ./src --ext ts,tsx,json --exec yarn dev",
     "build": "tsc --project ./src",
     "clean": "rm -rf ./dist",
@@ -19,19 +21,10 @@
   "license": "Unlicense",
   "homepage": "https://github.com/hollowverse/release-manager#readme",
   "lint-staged": {
-    "**/*.{j,t}s{x,}": [
-      "prettier --write --single-quote --trailing-comma all",
-      "tslint --project .",
-      "git add"
-    ],
-    "**/*.js{x,}": [
-      "eslint"
-    ]
+    "**/*.{j,t}s{x,}": ["prettier --write", "tslint --project .", "git add"],
+    "**/*.js{x,}": ["eslint"]
   },
-  "pre-commit": [
-    "validate-file-names",
-    "lint-staged"
-  ],
+  "pre-commit": ["validate-file-names", "lint-staged"],
   "dependencies": {
     "@hollowverse/common": "https://github.com/hollowverse/common",
     "aws-sdk": "^2.117.0",
