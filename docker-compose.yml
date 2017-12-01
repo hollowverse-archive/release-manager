@@ -7,8 +7,8 @@ services:
       dockerfile: Dockerfile-dev
       context: .
     ports:
-      - "${RELEASE_MANAGER_PORT:-8082}"
-      - "${RELEASE_MANAGER_DEBUG_PORT:-9228}"
+      - "${RELEASE_MANAGER_PORT:-8082}:${RELEASE_MANAGER_PORT:-8082}"
+      - "${RELEASE_MANAGER_DEBUG_PORT:-9228}:${RELEASE_MANAGER_PORT:-8082}"
     volumes:
       - type: bind
         source: .
