@@ -1,6 +1,10 @@
 module.exports = {
   rules: [
     {
+      validation: 'camelCase',
+      patterns: ['**/*'],
+    },
+    {
       validation: 'ignore',
       patterns: [
         '*/**/typings/*',
