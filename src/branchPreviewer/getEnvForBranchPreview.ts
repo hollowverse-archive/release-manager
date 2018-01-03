@@ -2,10 +2,10 @@ import { EnvDetails } from '../typings/environments';
 import { eb } from '../eb';
 import { prefix, unprefix } from '../helpers/prefix';
 
-/** 
+/**
  * For a given branch name (e.g. read from a cookie or query string), this function
  * looks for a matching, active EB environment and returns an object containing
- * the name and the URL of that environment. If no matching environment is found, 
+ * the name and the URL of that environment. If no matching environment is found,
  * or if the environment was terminated, this function returns `undefined`.
  */
 const getEnvForBranchPreview = async (
@@ -13,7 +13,7 @@ const getEnvForBranchPreview = async (
 ): Promise<EnvDetails | undefined> => {
   const { Environments } = await eb
     .describeEnvironments({
-      ApplicationName: 'hollowverse',
+      ApplicationName: 'Hollowverse',
       IncludeDeleted: false,
       EnvironmentNames: [prefix(branch)],
     })

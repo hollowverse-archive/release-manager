@@ -4,7 +4,7 @@ import { prefix, unprefix } from '../helpers/prefix';
 
 export const urlsByEnvironment = eb
   .describeEnvironments({
-    ApplicationName: 'hollowverse',
+    ApplicationName: 'Hollowverse',
     EnvironmentNames: envNames.map(prefix),
     IncludeDeleted: false,
   })
