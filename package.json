@@ -27,10 +27,12 @@
       "eslint"
     ]
   },
-  "pre-commit": [
-    "validate-filenames",
-    "lint-staged"
-  ],
+  "husky": {
+    "hooks": {
+      "pre-commit": "run-p --aggregate-output validate-filenames lint-staged",
+      "pre-push": "yarn test"
+    }
+  },
   "dependencies": {
     "@hollowverse/common": "hollowverse/common",
     "aws-sdk": "^2.117.0",
@@ -64,7 +66,6 @@
     "eslint-plugin-react": "^7.3.0",
     "lint-staged": "^4.0.3",
     "nodemon": "^1.11.0",
-    "pre-commit": "^1.2.2",
     "prettier": "^1.5.3",
     "stylelint": "^8.3.1",
     "stylelint-config-standard": "^17.0.0",
