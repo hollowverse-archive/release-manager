@@ -77,7 +77,8 @@
     "tslint-loader": "^3.5.3",
     "tslint-microsoft-contrib": "^5.0.1",
     "tslint-react": "^3.2.0",
-    "typescript": "^2.5.2"
+    "typescript": "^2.5.2",
+    "yarnhook": "^0.1.1"
   },
   "engines": {
     "node": ">= 9.2"
