@@ -30,7 +30,10 @@
   "husky": {
     "hooks": {
       "pre-commit": "run-p --aggregate-output validate-filenames lint-staged",
-      "pre-push": "yarn test"
+      "pre-push": "yarn test",
+      "post-merge": "yarnhook",
+      "post-checkout": "yarnhook",
+      "post-rewrite": "yarnhook"
     }
   },
   "dependencies": {
