@@ -1,6 +1,6 @@
 import { urlsByEnvironment } from './urlsByEnvironment';
 import { createRandomEnvNameGenerator } from './getRandomEnvName';
-import { weightsByEnvironment } from './environments';
+import { weightsByEnvironment, defaultEnvName } from './environments';
 import { EnvDetails } from '../typings/environments';
 import * as isBot from 'is-bot';
 
@@ -17,13 +17,11 @@ const getEnvForTrafficSplitting = async (
   userAgent?: string,
 ): Promise<EnvDetails> => {
   let envUrl;
-
   const map = await urlsByEnvironment;
-  const defaultEnvironment = map.entries().next().value;
 
   // Always serve the default environment for search engines and other crawlers
   if (userAgent !== undefined && isBot(userAgent)) {
-    [envName, envUrl] = defaultEnvironment;
+    envName = defaultEnvName;
   }
 
   if (!envName || map.get(envName) === undefined) {
@@ -34,7 +32,7 @@ const getEnvForTrafficSplitting = async (
   // if the environment is defined but does not have a URL
   envUrl = map.get(envName);
   if (!envUrl) {
-    [envName, envUrl] = defaultEnvironment;
+    envUrl = map.get(defaultEnvName) as string;
   }
 
   return { name: envName, url: envUrl };
