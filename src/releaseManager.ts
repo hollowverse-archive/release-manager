@@ -51,6 +51,7 @@ server.use(async (req, res) => {
   if (!env || !env.url) {
     env = await getEnvForTrafficSplitting(
       req.cookies[trafficSplittingCookieName],
+      req.header('user-agent'),
     );
     res.cookie(trafficSplittingCookieName, env.name, {
       maxAge: 24 * 60 * 60 * 1000,
