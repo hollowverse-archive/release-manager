@@ -31,13 +31,14 @@ const branchPreviewCookieName = 'branch';
 
 server.use(async (req, res) => {
   let env: EnvDetails | void;
-
+  const isStaticResource = req.path.toLowerCase().startsWith('/static');
+  
   const branch = req.query.branch || req.cookies[branchPreviewCookieName];
   if (branch) {
     res.setHeader('X-Hollowverse-Requested-Environment', branch);
-
+    
     env = await getEnvForBranchPreview(branch).catch(noop);
-    if (env) {
+    if (env && !isStaticResource) {
       res.cookie(branchPreviewCookieName, env.name, {
         maxAge: 2 * 60 * 60 * 1000,
         httpOnly: true,
@@ -45,22 +46,23 @@ server.use(async (req, res) => {
       });
     }
   }
-
+  
   if (!env || !env.url) {
     env = await getEnvForTrafficSplitting(
       req.cookies[trafficSplittingCookieName],
       req.header('user-agent'),
     );
-
-    res.clearCookie(branchPreviewCookieName);
-
-    res.cookie(trafficSplittingCookieName, env.name, {
-      maxAge: 24 * 60 * 60 * 1000,
-      httpOnly: true,
-      secure: true,
-    });
+    
+    if (!isStaticResource) {
+      res.clearCookie(branchPreviewCookieName);
+      res.cookie(trafficSplittingCookieName, env.name, {
+        maxAge: 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        secure: true,
+      });
+    }
   }
-
+  
   res.setHeader('X-Hollowverse-Resolved-Environment', env.name);
 
   proxyServer.web(req, res, {
