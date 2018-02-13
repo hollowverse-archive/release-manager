@@ -31,6 +31,21 @@ const branchPreviewCookieName = 'branch';
 
 server.use(async (req, res) => {
   let env: EnvDetails | void;
+
+  // When a response is cached with `Cache-Control: immutable` (see above), 
+  // the browser will not even send a request to check if the resource 
+  // has been updated. So if for example the user was on the `new-app` branch
+  // and they are switched to `master`, and if both branches has shared assets, the 
+  // browser will re-use the assets previously cached for `new-app`.
+  //
+  // Since the responses for these assets had `Set-Cookie: branch=new-app`,
+  // the environment which was just routed to `master` will be set again to
+  // `branch=new-app` when the asset is read from disk. So immutable caching
+  // is causing the environment to be reset again to the branch that the user
+  // was on when he first requested that asset.
+  // We should _not_ set the `Set-Cookie` header on static assets.
+
+  // See https://github.com/hollowverse/hollowverse/issues/287
   const isStaticResource = req.path.toLowerCase().startsWith('/static');
   
   const branch = req.query.branch || req.cookies[branchPreviewCookieName];
