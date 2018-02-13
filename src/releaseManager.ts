@@ -43,8 +43,6 @@ server.use(async (req, res) => {
         httpOnly: true,
         secure: true,
       });
-    } else {
-      res.clearCookie(branchPreviewCookieName);
     }
   }
 
@@ -53,6 +51,9 @@ server.use(async (req, res) => {
       req.cookies[trafficSplittingCookieName],
       req.header('user-agent'),
     );
+
+    res.clearCookie(branchPreviewCookieName);
+
     res.cookie(trafficSplittingCookieName, env.name, {
       maxAge: 24 * 60 * 60 * 1000,
       httpOnly: true,

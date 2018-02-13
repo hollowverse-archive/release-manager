@@ -32,6 +32,7 @@ const getEnvForTrafficSplitting = async (
   // if the environment is defined but does not have a URL
   envUrl = map.get(envName);
   if (!envUrl) {
+    envName = defaultEnvName;
     envUrl = map.get(defaultEnvName) as string;
   }
 
