@@ -46,14 +46,16 @@ server.use(async (req, res) => {
   // We should _not_ set the `Set-Cookie` header on static assets.
 
   // See https://github.com/hollowverse/hollowverse/issues/287
-  const isStaticResource = req.path.toLowerCase().startsWith('/static');
+  const path = `${req.path.toLowerCase().replace(/\/$/i, '')}/`;
+
+  const shouldNotSetCookie = path.startsWith('/static/') || path.startsWith('/log/');
   
   const branch = req.query.branch || req.cookies[branchPreviewCookieName];
   if (branch) {
     res.setHeader('X-Hollowverse-Requested-Environment', branch);
     
     env = await getEnvForBranchPreview(branch).catch(noop);
-    if (env && !isStaticResource) {
+    if (env && !shouldNotSetCookie) {
       res.cookie(branchPreviewCookieName, env.name, {
         maxAge: 2 * 60 * 60 * 1000,
         httpOnly: true,
@@ -68,7 +70,7 @@ server.use(async (req, res) => {
       req.header('user-agent'),
     );
     
-    if (!isStaticResource) {
+    if (!shouldNotSetCookie) {
       res.clearCookie(branchPreviewCookieName);
       res.cookie(trafficSplittingCookieName, env.name, {
         maxAge: 24 * 60 * 60 * 1000,
