@@ -5,11 +5,12 @@
   "description": "Release Manager provides cookie-based traffic splitting for hollowverse.com",
   "repository": "https://github.com/hollowverse/release-manager.git",
   "scripts": {
-    "test": "run-p -l --aggregate-output validate-filenames lint-js lint-ts",
+    "test": "run-p -l --aggregate-output validate-filenames lint-js lint-ts check-ts",
     "lint-js": "eslint '**/*.js{,x}'",
     "lint-ts": "tslint './*.ts' 'src/**/*.ts{,x}' --project .",
     "dev": "PORT=${RELEASE_MANAGER_PORT:-8082} node --inspect=0.0.0.0:${RELEASE_MANAGER_DEBUG_PORT:-9228} -r 'ts-node/register' src/releaseManager.ts",
     "dev:watch": "nodemon --watch ./src --ext ts,tsx,json --exec yarn dev",
+    "check-ts": "tsc --project ./src --noEmit",
     "build": "tsc --project ./src",
     "clean": "rm -rf ./dist",
     "start": "node dist/releaseManager.js",
@@ -81,7 +82,7 @@
     "tslint-loader": "^3.5.3",
     "tslint-microsoft-contrib": "^5.0.1",
     "tslint-react": "^3.2.0",
-    "typescript": "^2.5.2",
+    "typescript": "^2.7.2",
     "yarnhook": "^0.1.1"
   },
   "engines": {
