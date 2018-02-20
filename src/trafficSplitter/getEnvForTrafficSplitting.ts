@@ -12,7 +12,7 @@ const getEnvName = createRandomEnvNameGenerator(weightsByEnvironment);
  * a random environment if that fails. The returned object includes the name
  * and the URL of the final environment.
  */
-const getEnvForTrafficSplitting = async (
+export const getEnvForTrafficSplitting = async (
   envName: string | undefined,
   userAgent?: string,
 ): Promise<EnvDetails> => {
@@ -39,4 +39,3 @@ const getEnvForTrafficSplitting = async (
   return { name: envName, url: envUrl };
 };
 
-export { getEnvForTrafficSplitting };
