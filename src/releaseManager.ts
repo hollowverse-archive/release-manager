@@ -16,6 +16,17 @@ process.on('unhandledRejection', () => {
 
 const proxyServer = httpProxy.createProxyServer();
 
+proxyServer.on('error', (error, _, res) => {
+  setIsHealthy(false);
+  console.error('Proxy error:', error);
+
+  res.writeHead(500, {
+    'Content-Type': 'text/plain',
+  });
+
+  res.end('Something went wrong.');
+});
+
 const server = express();
 
 server.use('/health', health);
@@ -32,10 +43,10 @@ const branchPreviewCookieName = 'branch';
 server.use(async (req, res) => {
   let env: EnvDetails | void;
 
-  // When a response is cached with `Cache-Control: immutable` (see above), 
-  // the browser will not even send a request to check if the resource 
+  // When a response is cached with `Cache-Control: immutable` (see above),
+  // the browser will not even send a request to check if the resource
   // has been updated. So if for example the user was on the `new-app` branch
-  // and they are switched to `master`, and if both branches has shared assets, the 
+  // and they are switched to `master`, and if both branches has shared assets, the
   // browser will re-use the assets previously cached for `new-app`.
   //
   // Since the responses for these assets had `Set-Cookie: branch=new-app`,
@@ -48,12 +59,13 @@ server.use(async (req, res) => {
   // See https://github.com/hollowverse/hollowverse/issues/287
   const path = `${req.path.toLowerCase().replace(/\/$/i, '')}/`;
 
-  const shouldNotSetCookie = path.startsWith('/static/') || path.startsWith('/log/');
-  
+  const shouldNotSetCookie =
+    path.startsWith('/static/') || path.startsWith('/log/');
+
   const branch = req.query.branch || req.cookies[branchPreviewCookieName];
   if (branch) {
     res.setHeader('X-Hollowverse-Requested-Environment', branch);
-    
+
     env = await getEnvForBranchPreview(branch).catch(noop);
     if (env && !shouldNotSetCookie) {
       res.cookie(branchPreviewCookieName, env.name, {
@@ -63,13 +75,13 @@ server.use(async (req, res) => {
       });
     }
   }
-  
+
   if (!env || !env.url) {
     env = await getEnvForTrafficSplitting(
       req.cookies[trafficSplittingCookieName],
       req.header('user-agent'),
     );
-    
+
     if (!shouldNotSetCookie) {
       res.clearCookie(branchPreviewCookieName);
       res.cookie(trafficSplittingCookieName, env.name, {
@@ -79,7 +91,7 @@ server.use(async (req, res) => {
       });
     }
   }
-  
+
   res.setHeader('X-Hollowverse-Resolved-Environment', env.name);
 
   proxyServer.web(req, res, {
