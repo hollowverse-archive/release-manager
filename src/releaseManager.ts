@@ -97,7 +97,8 @@ server.use(async (req, res) => {
   proxyServer.web(req, res, {
     // tslint:disable-next-line:no-http-string
     target: `https://${env.url}`,
-    changeOrigin: false,
+    changeOrigin: true,
+    toProxy: true,
 
     // If set to `true`, the process will crash when validating the certificate
     // of the environment endpoint, because that endpoint currently has a certificate
