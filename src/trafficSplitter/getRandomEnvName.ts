@@ -1,4 +1,4 @@
-import * as Chance from 'chance';
+import Chance from 'chance';
 
 const chance = new Chance();
 
@@ -19,7 +19,7 @@ export function* createRandomEnvNameGenerator(
   // tslint:disable-next-line:no-constant-condition
   while (true) {
     // Get a random environment, excluding environments that have been used
-    const envName = chance.pickone(Object.keys(cycle)) as keyof typeof cycle;
+    const envName = chance.pickone(Object.keys(cycle));
 
     yield envName;
 

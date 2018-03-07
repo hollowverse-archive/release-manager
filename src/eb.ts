@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import fs from 'fs';
+import path from 'path';
 import { ElasticBeanstalk } from 'aws-sdk';
 
 const AWS_SECRET_PATH = path.join(process.cwd(), 'secrets/aws.json');

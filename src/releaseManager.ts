@@ -1,7 +1,7 @@
-import * as express from 'express';
-import * as httpProxy from 'http-proxy';
-import * as cookieParser from 'cookie-parser';
-import * as helmet from 'helmet';
+import express from 'express';
+import httpProxy from 'http-proxy';
+import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 import { noop } from 'lodash';
 
 import { health, setIsHealthy } from './health';

@@ -2,7 +2,7 @@ import { urlsByEnvironment } from './urlsByEnvironment';
 import { createRandomEnvNameGenerator } from './getRandomEnvName';
 import { weightsByEnvironment, defaultEnvName } from './environments';
 import { EnvDetails } from '../typings/environments';
-import * as isBot from 'is-bot';
+import isBot from 'is-bot';
 
 const getEnvName = createRandomEnvNameGenerator(weightsByEnvironment);
 
@@ -21,21 +21,20 @@ export const getEnvForTrafficSplitting = async (
 
   // Always serve the default environment for search engines and other crawlers
   if (userAgent !== undefined && isBot(userAgent)) {
-    envName = defaultEnvName;
+    envName = defaultEnvName; // tslint:disable-line:no-parameter-reassignment
   }
 
   if (!envName || map.get(envName) === undefined) {
-    envName = getEnvName.next().value;
+    envName = getEnvName.next().value; // tslint:disable-line:no-parameter-reassignment
   }
 
   // Get the URL from the routing map, falling back to first environment
   // if the environment is defined but does not have a URL
   envUrl = map.get(envName);
   if (!envUrl) {
-    envName = defaultEnvName;
+    envName = defaultEnvName; // tslint:disable-line:no-parameter-reassignment
     envUrl = map.get(defaultEnvName) as string;
   }
 
   return { name: envName, url: envUrl };
 };
-
