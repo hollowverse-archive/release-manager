@@ -42,8 +42,8 @@ const trafficSplittingCookieName = 'env';
 const branchPreviewCookieName = 'branch';
 
 type Context = {
-  requestedBranchName?: string;
-  requestedEnvironmentName?: string;
+  readonly requestedBranchName?: string;
+  readonly requestedEnvironmentName?: string;
 };
 
 type RequestWithContext = IncomingMessage & { context: Context };
