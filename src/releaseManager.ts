@@ -64,8 +64,19 @@ proxyServer.on('proxyRes', (_, req, res) => {
 
       // The `s-` prefix stands for "shared" and is only respected by
       // CDNs. Browsers will use the standard `max-age` directive.
-      // tslint:disable-next-line:no-backbone-get-set-outside-model
-      res.setHeader('Cache-Control', 's-max-age=0, proxy-revalidate');
+      let header = res.getHeader('Cache-Control');
+      if (!header) {
+        res.setHeader('Cache-Control', 's-max-age=0, proxy-revalidate');
+      } else {
+        if (Array.isArray(header)) {
+          header = header[0];
+        }
+
+        res.setHeader(
+          'Cache-Control',
+          `${header}, s-max-age=0, proxy-revalidate`,
+        );
+      }
     }
   }
 });
