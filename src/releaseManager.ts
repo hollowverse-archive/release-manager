@@ -40,6 +40,7 @@ server.use(cookieParser());
 
 const trafficSplittingCookieName = 'env';
 const branchPreviewCookieName = 'branch';
+const cdnNoCacheDirectives = 's-maxage=0, proxy-revalidate';
 
 type Context = {
   readonly requestedBranchName?: string;
@@ -66,16 +67,13 @@ proxyServer.on('proxyRes', (_, req, res) => {
       // CDNs. Browsers will use the standard `max-age` directive.
       let header = res.getHeader('Cache-Control');
       if (!header) {
-        res.setHeader('Cache-Control', 's-max-age=0, proxy-revalidate');
+        res.setHeader('Cache-Control', cdnNoCacheDirectives);
       } else {
         if (Array.isArray(header)) {
           header = header[0];
         }
 
-        res.setHeader(
-          'Cache-Control',
-          `${header}, s-max-age=0, proxy-revalidate`,
-        );
+        res.setHeader('Cache-Control', `${header}, ${cdnNoCacheDirectives}`);
       }
     }
   }
