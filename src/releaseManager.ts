@@ -9,6 +9,7 @@ import { redirectToHttps } from './redirectToHttps';
 import { getEnvForBranchPreview } from './branchPreviewer/getEnvForBranchPreview';
 import { getEnvForTrafficSplitting } from './trafficSplitter/getEnvForTrafficSplitting';
 import { EnvDetails } from './typings/environments.d';
+import { IncomingMessage } from 'http';
 
 process.on('unhandledRejection', () => {
   setIsHealthy(false);
@@ -40,6 +41,35 @@ server.use(cookieParser());
 const trafficSplittingCookieName = 'env';
 const branchPreviewCookieName = 'branch';
 
+type Context = {
+  requestedBranchName?: string;
+  requestedEnvironmentName?: string;
+};
+
+type RequestWithContext = IncomingMessage & { context: Context };
+
+function isRequestWithContext(req: IncomingMessage): req is RequestWithContext {
+  return 'context' in req;
+}
+
+proxyServer.on('proxyRes', (_, req, res) => {
+  if (isRequestWithContext(req)) {
+    const { requestedBranchName, requestedEnvironmentName } = req.context;
+    if (
+      requestedBranchName !== undefined ||
+      requestedEnvironmentName === undefined
+    ) {
+      // We do not want CDN to cache internal branches or requests
+      // that had no environments assigned to them before.
+
+      // The `s-` prefix stands for "shared" and is only respected by
+      // CDNs. Browsers will use the standard `max-age` directive.
+      // tslint:disable-next-line:no-backbone-get-set-outside-model
+      res.setHeader('Cache-Control', 's-max-age=0');
+    }
+  }
+});
+
 server.use(async (req, res) => {
   let env: EnvDetails | void;
 
@@ -62,11 +92,20 @@ server.use(async (req, res) => {
   const shouldNotSetCookie =
     path.startsWith('/static/') || path.startsWith('/log/');
 
-  const branch = req.query.branch || req.cookies[branchPreviewCookieName];
-  if (branch) {
-    res.setHeader('X-Hollowverse-Requested-Environment', branch);
+  const context: Context = {
+    requestedBranchName:
+      req.query.branch || req.cookies[branchPreviewCookieName] || undefined,
+    requestedEnvironmentName:
+      req.cookies[trafficSplittingCookieName] || undefined,
+  };
 
-    env = await getEnvForBranchPreview(branch).catch(noop);
+  if (context.requestedBranchName) {
+    res.setHeader(
+      'X-Hollowverse-Requested-Environment',
+      context.requestedBranchName,
+    );
+
+    env = await getEnvForBranchPreview(context.requestedBranchName).catch(noop);
     if (env && !shouldNotSetCookie) {
       res.cookie(branchPreviewCookieName, env.name, {
         maxAge: 2 * 60 * 60 * 1000,
@@ -78,7 +117,7 @@ server.use(async (req, res) => {
 
   if (!env || !env.url) {
     env = await getEnvForTrafficSplitting(
-      req.cookies[trafficSplittingCookieName],
+      context.requestedEnvironmentName,
       req.header('user-agent'),
     );
 
@@ -93,6 +132,9 @@ server.use(async (req, res) => {
   }
 
   res.setHeader('X-Hollowverse-Resolved-Environment', env.name);
+
+  // @ts-ignore
+  req.context = context;
 
   proxyServer.web(req, res, {
     // tslint:disable-next-line:no-http-string
