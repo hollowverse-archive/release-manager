@@ -1,10 +1,16 @@
 #! /usr/bin/env node
 
+/* eslint import/no-extraneous-dependencies: ["error", {"devDependencies": true}] */
+/* eslint-disable no-console */
 const shelljs = require('shelljs');
-const decryptSecrets = require('@hollowverse/common/helpers/decryptSecrets');
-const executeCommands = require('@hollowverse/common/helpers/executeCommands');
-const writeJsonFile = require('@hollowverse/common/helpers/writeJsonFile');
-const createZipFile = require('@hollowverse/common/helpers/createZipFile');
+const {
+  decryptSecrets,
+} = require('@hollowverse/common/helpers/decryptSecrets');
+const {
+  executeCommands,
+} = require('@hollowverse/common/helpers/executeCommands');
+const { writeJsonFile } = require('@hollowverse/common/helpers/writeJsonFile');
+const { createZipFile } = require('@hollowverse/common/helpers/createZipFile');
 
 const {
   ENC_PASS_AWS,
