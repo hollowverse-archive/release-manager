@@ -150,7 +150,7 @@ export const createReleaseManagerRouter = ({
 
     forwardRequest(req, res, {
       ...context,
-      target: `https://${env.url}`,
+      target: env.url,
       resolvedEnvironmentName: env.name,
     });
   });

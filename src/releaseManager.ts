@@ -57,7 +57,7 @@ const { router, modifyProxyResponse } = createReleaseManagerRouter({
     }
 
     proxyServer.web(req, res, {
-      target,
+      target: `https://${target}`,
       changeOrigin: true,
       toProxy: true,
 
