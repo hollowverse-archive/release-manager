@@ -5,7 +5,8 @@
   "description": "Release Manager provides cookie-based traffic splitting for hollowverse.com",
   "repository": "https://github.com/hollowverse/release-manager.git",
   "scripts": {
-    "test": "run-p -l --aggregate-output validate-filenames lint-js lint-ts check-ts",
+    "test": "jest --colors",
+    "pretest": "run-p -l --aggregate-output validate-filenames lint-js lint-ts check-ts",
     "lint-js": "eslint '**/*.js{,x}'",
     "lint-ts": "tslint './*.ts' 'src/**/*.ts{,x}' --project .",
     "dev": "PORT=${RELEASE_MANAGER_PORT:-8082} node --inspect=0.0.0.0:${RELEASE_MANAGER_DEBUG_PORT:-9228} -r 'ts-node/register' src/releaseManager.ts",
@@ -16,6 +17,24 @@
     "start": "node dist/releaseManager.js",
     "validate-filenames": "validate-filenames --config commonconfig.js",
     "lint-staged": "lint-staged"
+  },
+  "jest": {
+    "globals": {
+      "ts-jest": {
+        "useBabelrc": true
+      }
+    },
+    "transform": {
+      "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json"
+    ]
   },
   "license": "Unlicense",
   "homepage": "https://github.com/hollowverse/release-manager#readme",
@@ -31,7 +50,7 @@
   "husky": {
     "hooks": {
       "pre-commit": "run-p --aggregate-output validate-filenames lint-staged",
-      "pre-push": "yarn test",
+      "pre-push": "yarn pretest",
       "post-merge": "yarnhook",
       "post-checkout": "yarnhook",
       "post-rewrite": "yarnhook"
@@ -57,10 +76,12 @@
     "@types/express": "^4.0.36",
     "@types/helmet": "^0.0.37",
     "@types/http-proxy": "^1.12.0",
+    "@types/jest": "^22.2.0",
     "@types/lodash": "^4.14.68",
     "@types/node": "^8.0.8",
     "@types/query-string": "^4.3.1",
     "@types/shelljs": "^0.7.2",
+    "@types/supertest": "^2.0.4",
     "babel-eslint": "^8.2.2",
     "eslint": "^4.18.2",
     "eslint-config-airbnb": "^16.1.0",
@@ -70,6 +91,7 @@
     "eslint-plugin-jsx-a11y": "^6.0.3",
     "eslint-plugin-react": "^7.7.0",
     "husky": "^0.15.0-rc.8",
+    "jest": "^22.4.2",
     "lint-staged": "^7.0.0",
     "nodemon": "^1.11.0",
     "prettier": "^1.11.1",
@@ -77,6 +99,8 @@
     "stylelint": "^8.0.0",
     "stylelint-config-standard": "^17.0.0",
     "stylelint-no-unsupported-browser-features": "^1.0.0",
+    "supertest": "^3.0.0",
+    "ts-jest": "^22.4.1",
     "ts-node": "^3.2.0",
     "tslint": "^5.9.1",
     "tslint-config-prettier": "^1.9.0",

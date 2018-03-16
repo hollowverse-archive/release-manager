@@ -1,8 +1,8 @@
 import { urlsByEnvironment } from './urlsByEnvironment';
 import { createRandomEnvNameGenerator } from './getRandomEnvName';
 import { weightsByEnvironment, defaultEnvName } from './environments';
-import { EnvDetails } from '../typings/environments';
 import isBot from 'is-bot';
+import { GetEnvForTrafficSplitting } from '../createReleaseManagerRouter';
 
 const getEnvName = createRandomEnvNameGenerator(weightsByEnvironment);
 
@@ -12,10 +12,10 @@ const getEnvName = createRandomEnvNameGenerator(weightsByEnvironment);
  * a random environment if that fails. The returned object includes the name
  * and the URL of the final environment.
  */
-export const getEnvForTrafficSplitting = async (
-  envName: string | undefined,
-  userAgent?: string,
-): Promise<EnvDetails> => {
+export const getEnvForTrafficSplitting: GetEnvForTrafficSplitting = async (
+  envName,
+  userAgent,
+) => {
   let envUrl;
   const map = await urlsByEnvironment;
 
