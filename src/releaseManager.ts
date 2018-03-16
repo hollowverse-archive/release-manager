@@ -34,17 +34,43 @@ proxyServer.on('error', (error, _, res) => {
   res.end('Something went wrong.');
 });
 
-server.use(
-  createReleaseManagerRouter({
-    branchPreviewCookieName: 'branch',
-    trafficSplittingCookieName: 'env',
-    isSetCookieAllowedForPath: negate(
-      path => path.startsWith('/static/') || path.startsWith('/log/'),
-    ),
-    getEnvForBranchPreview,
-    getEnvForTrafficSplitting,
-    proxyServer,
-  }),
-);
+const { router, modifyProxyResponse } = createReleaseManagerRouter({
+  branchPreviewCookieName: 'branch',
+  trafficSplittingCookieName: 'env',
+  isSetCookieAllowedForPath: negate(
+    path => path.startsWith('/static/') || path.startsWith('/log/'),
+  ),
+  getEnvForBranchPreview,
+  getEnvForTrafficSplitting,
+  forwardRequest: (
+    req,
+    res,
+    { target, resolvedEnvironmentName, requestedBranchName },
+  ) => {
+    res.setHeader(
+      'X-Hollowverse-Resolved-Environment',
+      resolvedEnvironmentName,
+    );
+
+    if (requestedBranchName) {
+      res.setHeader('X-Hollowverse-Requested-Environment', requestedBranchName);
+    }
+
+    proxyServer.web(req, res, {
+      target,
+      changeOrigin: true,
+      toProxy: true,
+
+      // If set to `true`, the process will crash when validating the certificate
+      // of the environment endpoint, because that endpoint currently has a certificate
+      // for `hollowverse.com` instead of the original Elastic Load Balancer sub-domain.
+      secure: false,
+    });
+  },
+});
+
+proxyServer.on('proxyReq', (_, req, res) => modifyProxyResponse(req, res));
+
+server.use(router);
 
 server.listen(process.env.PORT);

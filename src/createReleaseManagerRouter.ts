@@ -1,6 +1,6 @@
 import express from 'express';
 import httpProxy from 'http-proxy';
-import { IncomingMessage } from 'http';
+import { IncomingMessage, ServerResponse } from 'http';
 import { noop } from 'lodash';
 import cookieParser from 'cookie-parser';
 
@@ -34,10 +34,19 @@ export type GetEnvForTrafficSplitting = (
 export type CreateReleaseManagerRouterOptions = {
   trafficSplittingCookieName?: string;
   branchPreviewCookieName?: string;
-  proxyServer?: httpProxy;
   getEnvForBranchPreview: GetEnvForBranchPreview;
   getEnvForTrafficSplitting: GetEnvForTrafficSplitting;
   isSetCookieAllowedForPath(path: string): boolean;
+  forwardRequest(
+    req: express.Request,
+    res: express.Response,
+    options: {
+      target: string;
+      requestedBranchName?: string;
+      requestedEnvironmentName?: string;
+      resolvedEnvironmentName: string;
+    },
+  ): void;
 };
 
 // tslint:disable-next-line:max-func-body-length
@@ -46,14 +55,14 @@ export const createReleaseManagerRouter = ({
   trafficSplittingCookieName = 'env',
   getEnvForBranchPreview,
   getEnvForTrafficSplitting,
-  proxyServer = httpProxy.createProxyServer(),
+  forwardRequest,
   isSetCookieAllowedForPath,
 }: CreateReleaseManagerRouterOptions) => {
   const router = express();
 
   router.use(cookieParser());
 
-  proxyServer.on('proxyRes', (_, req, res) => {
+  const modifyProxyResponse = (req: IncomingMessage, res: ServerResponse) => {
     if (isRequestWithContext(req)) {
       const { requestedBranchName, requestedEnvironmentName } = req.context;
       if (
@@ -77,7 +86,7 @@ export const createReleaseManagerRouter = ({
         }
       }
     }
-  });
+  };
 
   router.use(async (req, res) => {
     let env: EnvDetails | void;
@@ -108,11 +117,6 @@ export const createReleaseManagerRouter = ({
     };
 
     if (context.requestedBranchName) {
-      res.setHeader(
-        'X-Hollowverse-Requested-Environment',
-        context.requestedBranchName,
-      );
-
       env = await getEnvForBranchPreview(context.requestedBranchName).catch(
         noop,
       );
@@ -141,23 +145,15 @@ export const createReleaseManagerRouter = ({
       }
     }
 
-    res.setHeader('X-Hollowverse-Resolved-Environment', env.name);
-
     // @ts-ignore
     req.context = context;
 
-    proxyServer.web(req, res, {
-      // tslint:disable-next-line:no-http-string
+    forwardRequest(req, res, {
+      ...context,
       target: `https://${env.url}`,
-      changeOrigin: true,
-      toProxy: true,
-
-      // If set to `true`, the process will crash when validating the certificate
-      // of the environment endpoint, because that endpoint currently has a certificate
-      // for `hollowverse.com` instead of the original Elastic Load Balancer sub-domain.
-      secure: false,
+      resolvedEnvironmentName: env.name,
     });
   });
 
-  return router;
+  return { router, modifyProxyResponse };
 };

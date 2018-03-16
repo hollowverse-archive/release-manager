@@ -4,10 +4,12 @@ import {
   createReleaseManagerRouter,
   CreateReleaseManagerRouterOptions,
 } from './createReleaseManagerRouter';
+import { IncomingMessage, ServerResponse } from 'http';
 
 type TestContext = CreateReleaseManagerRouterOptions & {
   app: Express;
   agent: SuperTest<supertest.Test>;
+  modifyProxyResponse(req: IncomingMessage, res: ServerResponse): void;
 };
 
 const createTestContext = (
@@ -15,6 +17,7 @@ const createTestContext = (
     isSetCookieAllowedForPath,
     getEnvForBranchPreview,
     getEnvForTrafficSplitting,
+    forwardRequest,
     ...restOptions
   }: Partial<CreateReleaseManagerRouterOptions> = {
     isSetCookieAllowedForPath: () => true,
@@ -30,16 +33,29 @@ const createTestContext = (
 ): TestContext => {
   const app = express();
   const agent = supertest(app);
+  let _modifyResponse: TestContext['modifyProxyResponse'];
+
   const options: CreateReleaseManagerRouterOptions = {
     isSetCookieAllowedForPath: jest.fn(isSetCookieAllowedForPath),
     getEnvForBranchPreview: jest.fn(getEnvForBranchPreview),
     getEnvForTrafficSplitting: jest.fn(getEnvForTrafficSplitting),
+    forwardRequest: jest.fn(
+      forwardRequest ||
+        ((req, res, { target }) => {
+          console.log('Requested forwarded to', target);
+          _modifyResponse(req, res);
+          res.send();
+        }),
+    ),
     ...restOptions,
   };
 
-  app.use(createReleaseManagerRouter(options));
+  const { router, modifyProxyResponse } = createReleaseManagerRouter(options);
+  _modifyResponse = modifyProxyResponse;
 
-  return { app, agent, ...options };
+  app.use(router);
+
+  return { app, agent, modifyProxyResponse, ...options };
 };
 
 describe('Release Manager', () => {
@@ -50,7 +66,8 @@ describe('Release Manager', () => {
 
   describe('Traffic splitting', () => {
     it('works', async () => {
-      expect(await context.agent.get('/path')).toBe(1);
+      await context.agent.get('/path').then(r => r);
+      expect(context.forwardRequest).toHaveBeenCalled();
     });
   });
 
