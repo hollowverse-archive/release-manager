@@ -66,7 +66,7 @@ describe('Release Manager', () => {
 
   describe('Traffic splitting', () => {
     it('works', async () => {
-      await context.agent.get('/path').then(r => r);
+      await context.agent.get('/path');
       expect(context.forwardRequest).toHaveBeenCalled();
     });
   });
