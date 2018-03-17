@@ -50,8 +50,8 @@ const createTestContext = ({
     isSetCookieAllowedForPath: jest.fn(isSetCookieAllowedForPath),
     getEnvForBranchPreview: jest.fn(getEnvForBranchPreview),
     getEnvForTrafficSplitting: jest.fn(getEnvForTrafficSplitting),
-    ...restOptions,
     forwardRequest: jest.fn(patchedForwardRequest),
+    ...restOptions,
   };
 
   const { router, modifyProxyResponse } = createReleaseManagerRouter(options);

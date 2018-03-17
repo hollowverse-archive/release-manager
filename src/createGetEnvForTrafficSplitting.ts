@@ -6,11 +6,11 @@ import { EnvDetails } from './types';
 export type GetEnvForTrafficSplitting = (
   envName: string | undefined,
   userAgent?: string,
-) => Promise<EnvDetails>;
+) => Promise<Readonly<EnvDetails>>;
 
 type CreateGetEnvForTrafficSplittingOptions<EnvName extends string> = {
-  weightsByEnvironment: Record<EnvName, number>;
-  urlsByEnvironment: Promise<Map<EnvName, string>>;
+  weightsByEnvironment: Readonly<Record<EnvName, number>>;
+  urlsByEnvironment: Promise<ReadonlyMap<EnvName, string>>;
   defaultEnvName: EnvName;
 };
 

@@ -6,7 +6,7 @@ import {
 import { times, uniq, countBy, mapValues } from 'lodash';
 import bluebird from 'bluebird';
 
-describe('`getEnvForTrafficSplitting', () => {
+describe('`getEnvForTrafficSplitting`', () => {
   let getEnvForTrafficSplitting: GetEnvForTrafficSplitting;
 
   beforeEach(() => {

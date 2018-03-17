@@ -8,10 +8,10 @@ import { EnvDetails } from './types';
 
 const cdnNoCacheDirectives = 's-maxage=0, proxy-revalidate';
 
-type Context = {
-  readonly requestedBranchName?: string;
-  readonly requestedEnvironmentName?: string;
-};
+type Context = Readonly<{
+  requestedBranchName?: string;
+  requestedEnvironmentName?: string;
+}>;
 
 type RequestWithContext = IncomingMessage & { context: Context };
 
