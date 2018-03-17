@@ -99,6 +99,10 @@
     minimatch "^3.0.4"
     shelljs "^0.7.8"
 
+"@types/bluebird@^3.5.20":
+  version "3.5.20"
+  resolved "https://registry.yarnpkg.com/@types/bluebird/-/bluebird-3.5.20.tgz#f6363172add6f4eabb8cada53ca9af2781e8d6a1"
+
 "@types/body-parser@*":
   version "1.16.8"
   resolved "https://registry.yarnpkg.com/@types/body-parser/-/body-parser-1.16.8.tgz#687ec34140624a3bec2b1a8ea9268478ae8f3be3"
@@ -205,6 +209,10 @@
   resolved "https://registry.yarnpkg.com/@types/supertest/-/supertest-2.0.4.tgz#28770e13293365e240a842d7d5c5a1b3d2dee593"
   dependencies:
     "@types/superagent" "*"
+
+"@types/weighted@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@types/weighted/-/weighted-0.0.5.tgz#39056fe27635afd62de6577a1834225a16037f2e"
 
 JSONStream@^0.8.4:
   version "0.8.4"
@@ -788,6 +796,10 @@ block-stream@*:
   resolved "https://registry.yarnpkg.com/block-stream/-/block-stream-0.0.9.tgz#13ebfe778a03205cfe03751481ebb4b3300c126a"
   dependencies:
     inherits "~2.0.0"
+
+bluebird@^3.5.1:
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.1.tgz#d9551f9de98f1fcda1e683d17ee91a0602ee2eb9"
 
 body-parser@1.18.2:
   version "1.18.2"
@@ -6633,6 +6645,10 @@ watch@~0.18.0:
 webidl-conversions@^4.0.1, webidl-conversions@^4.0.2:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/webidl-conversions/-/webidl-conversions-4.0.2.tgz#a855980b1f0b6b359ba1d5d9fb39ae941faa63ad"
+
+weighted@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/weighted/-/weighted-0.3.0.tgz#81087f1ffe1b3f06db43dbe451451e9068166647"
 
 whatwg-encoding@^1.0.1, whatwg-encoding@^1.0.3:
   version "1.0.3"

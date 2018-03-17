@@ -1,10 +1,15 @@
-import { urlsByEnvironment } from './urlsByEnvironment';
-import { createRandomEnvNameGenerator } from './getRandomEnvName';
-import { weightsByEnvironment, defaultEnvName } from './environments';
 import isBot from 'is-bot';
-import { GetEnvForTrafficSplitting } from '../createReleaseManagerRouter';
+import {
+  GetEnvForTrafficSplitting,
+  EnvDetails,
+} from '../createReleaseManagerRouter';
+import weighted from 'weighted';
 
-const getEnvName = createRandomEnvNameGenerator(weightsByEnvironment);
+type CreateGetEnvForTrafficSplittingOptions<EnvName extends string> = {
+  weightsByEnvironment: Record<EnvName, number>;
+  urlsByEnvironment: Promise<Map<EnvName, string>>;
+  defaultEnvName: EnvName;
+};
 
 /**
  * For a possible environment name (e.g. read from a cookie), this function
@@ -12,29 +17,46 @@ const getEnvName = createRandomEnvNameGenerator(weightsByEnvironment);
  * a random environment if that fails. The returned object includes the name
  * and the URL of the final environment.
  */
-export const getEnvForTrafficSplitting: GetEnvForTrafficSplitting = async (
-  envName,
-  userAgent,
-) => {
-  let envUrl;
-  const map = await urlsByEnvironment;
+export const createGetEnvForTrafficSplitting = <EnvName extends string>({
+  urlsByEnvironment,
+  weightsByEnvironment,
+  defaultEnvName,
+}: CreateGetEnvForTrafficSplittingOptions<
+  EnvName
+>): GetEnvForTrafficSplitting => {
+  const getEnvDetailsByName = async (envName: string): Promise<EnvDetails> => {
+    const map = await urlsByEnvironment;
 
-  // Always serve the default environment for search engines and other crawlers
-  if (userAgent !== undefined && isBot(userAgent)) {
-    envName = defaultEnvName; // tslint:disable-line:no-parameter-reassignment
-  }
+    const url = map.get(envName as EnvName);
 
-  if (!envName || map.get(envName) === undefined) {
-    envName = getEnvName.next().value; // tslint:disable-line:no-parameter-reassignment
-  }
+    if (url !== undefined) {
+      return {
+        name: envName,
+        url,
+      };
+    }
 
-  // Get the URL from the routing map, falling back to first environment
-  // if the environment is defined but does not have a URL
-  envUrl = map.get(envName);
-  if (!envUrl) {
-    envName = defaultEnvName; // tslint:disable-line:no-parameter-reassignment
-    envUrl = map.get(defaultEnvName) as string;
-  }
+    throw new TypeError(`Could not find URL for environment ${envName}`);
+  };
 
-  return { name: envName, url: envUrl };
+  const getEnvNameForTrafficSplitting = async (
+    envName: string | undefined,
+    userAgent?: string,
+  ) => {
+    // Always serve the default environment for search engines and other crawlers
+    if (userAgent && isBot(userAgent)) {
+      return defaultEnvName;
+    }
+
+    if (envName && envName in weightsByEnvironment) {
+      return envName;
+    }
+
+    return weighted.select<string>(weightsByEnvironment);
+  };
+
+  return async (envName, userAgent) =>
+    getEnvDetailsByName(
+      await getEnvNameForTrafficSplitting(envName, userAgent),
+    );
 };

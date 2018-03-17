@@ -16,7 +16,7 @@ function isRequestWithContext(req: IncomingMessage): req is RequestWithContext {
   return 'context' in req;
 }
 
-type EnvDetails = {
+export type EnvDetails = {
   name: string;
   url: string;
 };
