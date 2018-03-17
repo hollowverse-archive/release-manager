@@ -26,32 +26,37 @@ const createTestContext = ({
     name: env,
     url: `https://example.com/${env}`,
   }),
-  forwardRequest,
+  forwardRequest = (_req, res) => {
+    res.send();
+  },
   ...restOptions
 }: Partial<CreateReleaseManagerRouterOptions> = {}): TestContext => {
   const app = express();
   const agent = supertest(app);
-  const defaultForwardRequest: CreateReleaseManagerRouterOptions['forwardRequest'] = (
-    _req,
-    res,
-  ) => {
-    res.send();
+  let _modifyProxyResponse: (req: IncomingMessage, res: ServerResponse) => void;
+  const patchedForwardRequest: typeof forwardRequest = (req, res, opts) => {
+    const send = res.send.bind(res);
+    res.send = () => {
+      _modifyProxyResponse(req, res);
+      send();
+
+      return res;
+    };
+    forwardRequest(req, res, opts);
   };
 
   const options: CreateReleaseManagerRouterOptions = {
     isSetCookieAllowedForPath: jest.fn(isSetCookieAllowedForPath),
     getEnvForBranchPreview: jest.fn(getEnvForBranchPreview),
     getEnvForTrafficSplitting: jest.fn(getEnvForTrafficSplitting),
-    forwardRequest: jest.fn(forwardRequest || defaultForwardRequest),
     ...restOptions,
+    forwardRequest: jest.fn(patchedForwardRequest),
   };
 
   const { router, modifyProxyResponse } = createReleaseManagerRouter(options);
+  _modifyProxyResponse = modifyProxyResponse;
 
-  app.use(router, (req, res, next) => {
-    modifyProxyResponse(req, res);
-    next();
-  });
+  app.use(router);
 
   return { app, agent, modifyProxyResponse, ...options };
 };
@@ -60,6 +65,21 @@ describe('Release Manager', () => {
   let context: TestContext;
 
   describe('Traffic splitting', () => {
+    it('does not change the original `Cache-Control` header', async () => {
+      const headerValue = 'public, max-age=2592000, immutable';
+      context = await createTestContext({
+        forwardRequest: async (_req, res) => {
+          res.setHeader('Cache-Control', headerValue);
+          res.send();
+        },
+      });
+
+      await context.agent
+        .get('/path')
+        .set('Cookie', 'env=master')
+        .expect('Cache-Control', headerValue);
+    });
+
     beforeEach(async () => {
       context = createTestContext({
         getEnvForTrafficSplitting: async (_envName, _userAgent) => ({
@@ -178,6 +198,43 @@ describe('Release Manager', () => {
       const branchName = chance.string();
       await context.agent.get('/path').set('Cookie', `branch=${branchName}`);
       expect(context.getEnvForBranchPreview).toHaveBeenCalledWith(branchName);
+    });
+
+    describe('Caching', () => {
+      let testResponse: supertest.Response;
+
+      afterEach(() => {
+        expect(testResponse.header['cache-control']).toMatch(/s-maxage=0/);
+        expect(testResponse.header['cache-control']).toMatch(
+          /proxy-revalidate/,
+        );
+      });
+
+      it('tells CDN not to cache the response', async () => {
+        testResponse = await context.agent
+          .get('/path?branch=test')
+          .set('Cookie', 'env=master');
+      });
+
+      it('does not modify other parts of the `Cache-Control` header', async () => {
+        const headerValue = 'public, max-age=2592000, immutable';
+        context = await createTestContext({
+          getEnvForBranchPreview: async () => ({
+            name: 'test',
+            url: 'https://example.com/branch/test',
+          }),
+          forwardRequest: async (_req, res) => {
+            res.setHeader('Cache-Control', headerValue);
+            res.send();
+          },
+        });
+
+        testResponse = await context.agent
+          .get('/path?branch=test')
+          .set('Cookie', 'env=master');
+
+        expect(testResponse.header['cache-control']).toMatch(headerValue);
+      });
     });
 
     describe('If the requested branch actually exists', () => {
