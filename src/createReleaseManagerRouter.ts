@@ -1,5 +1,4 @@
 import express from 'express';
-import httpProxy from 'http-proxy';
 import { IncomingMessage, ServerResponse } from 'http';
 import { noop } from 'lodash';
 import cookieParser from 'cookie-parser';
