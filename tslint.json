@@ -1,8 +1,7 @@
 {
-  "extends": [
-    "./node_modules/@hollowverse/common/tslint.json"
-  ],
+  "extends": ["./node_modules/@hollowverse/common/tslint.json"],
   "rules": {
-    "no-submodule-imports": [false]
+    "no-submodule-imports": [false],
+    "await-promise": [true, "Bluebird", "Response"]
   }
 }

@@ -69,7 +69,9 @@ const { router, modifyProxyResponse } = createReleaseManagerRouter({
   },
 });
 
-proxyServer.on('proxyReq', (_, req, res) => modifyProxyResponse(req, res));
+proxyServer.on('proxyReq', (_, req, res) => {
+  modifyProxyResponse(req, res);
+});
 
 server.use(router);
 

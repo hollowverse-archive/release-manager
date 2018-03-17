@@ -1,10 +1,11 @@
+// tslint:disable await-promise
 import express, { Express } from 'express';
 import supertest, { SuperTest } from 'supertest'; // tslint:disable-line:no-implicit-dependencies
 import {
   createReleaseManagerRouter,
   CreateReleaseManagerRouterOptions,
 } from './createReleaseManagerRouter';
-import { IncomingMessage, ServerResponse } from 'http';
+import { ServerResponse, IncomingMessage, OutgoingMessage } from 'http';
 import Chance from 'chance';
 
 type TestContext = Readonly<
@@ -57,19 +58,34 @@ const createTestContext = ({
 
 describe('Release Manager', () => {
   let context: TestContext;
-  beforeEach(async () => {
-    context = createTestContext({
-      async getEnvForTrafficSplitting(_envName, _userAgent) {
-        return {
-          name: 'master',
-          url: 'https://example.com/master',
-        };
-      },
-    });
-  });
 
   describe('Traffic splitting', () => {
-    it('checks if path is allowed for `Set-Cookie', async () => {
+    beforeEach(async () => {
+      context = createTestContext({
+        getEnvForTrafficSplitting: async (_envName, _userAgent) => ({
+          name: 'master',
+          url: 'https://example.com/master',
+        }),
+      });
+    });
+
+    it('passes the requested environment and user agent to `getEnvForTrafficSplitting`', async () => {
+      const chance = new Chance();
+      const envName = chance.string();
+      const userAgent = chance.string();
+
+      await context.agent
+        .get('/path')
+        .set('Cookie', `env=${envName}`)
+        .set('User-Agent', userAgent);
+
+      expect(context.getEnvForTrafficSplitting).toHaveBeenCalledWith(
+        envName,
+        userAgent,
+      );
+    });
+
+    it('checks if path is allowed for `Set-Cookie`', async () => {
       await context.agent.get('/path');
       expect(context.isSetCookieAllowedForPath).toHaveBeenCalledTimes(1);
       expect(context.isSetCookieAllowedForPath).toHaveBeenCalledWith(
@@ -98,8 +114,8 @@ describe('Release Manager', () => {
 
       expect(context.forwardRequest).toHaveBeenCalledTimes(1);
       expect(context.forwardRequest).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
+        expect.any(IncomingMessage),
+        expect.any(OutgoingMessage),
         expect.objectContaining({
           target: 'https://example.com/master',
         }),
@@ -111,8 +127,8 @@ describe('Release Manager', () => {
         const chance = new Chance();
 
         context = await createTestContext({
-          async getEnvForTrafficSplitting() {
-            return chance.pickone([
+          getEnvForTrafficSplitting: async () =>
+            chance.pickone([
               {
                 url: 'https://example.com/beta',
                 name: 'beta',
@@ -121,8 +137,7 @@ describe('Release Manager', () => {
                 url: 'https://example.com/master',
                 name: 'master',
               },
-            ]);
-          },
+            ]),
         });
       });
 
@@ -135,8 +150,8 @@ describe('Release Manager', () => {
         await context.agent.get('/path');
 
         expect(context.forwardRequest).toHaveBeenCalledWith(
-          expect.anything(),
-          expect.anything(),
+          expect.any(IncomingMessage),
+          expect.any(OutgoingMessage),
           expect.objectContaining({
             target: expect.stringMatching(/beta|master/),
           }),
@@ -146,15 +161,110 @@ describe('Release Manager', () => {
       it('sets a cookie on the response with the correct environment', async () => {
         context = await createTestContext({
           isSetCookieAllowedForPath: () => true,
-          async getEnvForTrafficSplitting() {
-            return {
-              url: 'https://example.com/beta',
-              name: 'beta',
-            };
-          },
+          getEnvForTrafficSplitting: async () => ({
+            url: 'https://example.com/beta',
+            name: 'beta',
+          }),
         });
 
         await context.agent.get('/path').expect('set-cookie', /env=beta/);
+      });
+    });
+  });
+
+  describe('Branch previewing', () => {
+    it('passes the requested branch name to `getEnvForBranchPreview`', async () => {
+      const chance = new Chance();
+      const branchName = chance.string();
+      await context.agent.get('/path').set('Cookie', `branch=${branchName}`);
+      expect(context.getEnvForBranchPreview).toHaveBeenCalledWith(branchName);
+    });
+
+    describe('If the requested branch actually exists', () => {
+      beforeEach(async () => {
+        context = await createTestContext({
+          getEnvForBranchPreview: async branch => ({
+            name: branch,
+            url: `https://internal.example.com/branch/${branch}`,
+          }),
+          getEnvForTrafficSplitting: async (env = 'master') => ({
+            name: env,
+            url: `https://public.example.com/branch/${env}`,
+          }),
+        });
+      });
+
+      afterEach(() => {
+        expect(context.getEnvForBranchPreview).toHaveBeenCalledTimes(1);
+        expect(context.getEnvForTrafficSplitting).not.toHaveBeenCalled();
+        expect(context.forwardRequest).toHaveBeenCalledTimes(1);
+        expect(context.forwardRequest).toHaveBeenCalledWith(
+          expect.any(IncomingMessage),
+          expect.any(OutgoingMessage),
+          expect.objectContaining({
+            target: 'https://internal.example.com/branch/test',
+          }),
+        );
+      });
+
+      it('forwards request with the `branch` cookie to the correct branch', async () => {
+        await context.agent.get('/path').set('Cookie', 'branch=test');
+      });
+
+      it('the `branch` query string parameter works exactly like the `branch` cookie', async () => {
+        await context.agent.get('/path?branch=test');
+      });
+
+      it('`branch` cookie always takes precedence over `env` cookie', async () => {
+        await context.agent
+          .get('/path')
+          .set('Cookie', 'env=master; branch=test');
+      });
+
+      it('`branch` query string parameter always takes precedence over `env` cookie', async () => {
+        await context.agent
+          .get('/path?branch=test')
+          .set('Cookie', 'env=master;');
+      });
+    });
+
+    describe('If the request branch does not exist', () => {
+      beforeEach(async () => {
+        context = await createTestContext({
+          getEnvForBranchPreview: async () => undefined,
+          getEnvForTrafficSplitting: async () => ({
+            name: 'fallback',
+            url: 'https://example.com/fallback',
+          }),
+        });
+      });
+
+      it('falls back to picking a regular, public environment', async () => {
+        await context.agent.get('/path').set('Cookie', 'branch=test');
+        expect(context.getEnvForBranchPreview).toHaveBeenCalledTimes(1);
+        expect(context.getEnvForTrafficSplitting).toHaveBeenCalledTimes(1);
+        expect(context.forwardRequest).toHaveBeenCalledWith(
+          expect.any(IncomingMessage),
+          expect.any(OutgoingMessage),
+          expect.objectContaining({
+            target: 'https://example.com/fallback',
+          }),
+        );
+      });
+
+      it('instructs browsers to delete the `branch` cookie', async () => {
+        await context.agent
+          .get('/path')
+          .set('Cookie', 'branch=test')
+          .expect('set-cookie', /branch=;/)
+          .expect('set-cookie', /Expires=Thu, 01 Jan 1970/);
+      });
+
+      it('sets the `env` cookie to the picked environment', async () => {
+        await context.agent
+          .get('/path')
+          .set('Cookie', 'branch=test')
+          .expect('set-cookie', /env=fallback;/);
       });
     });
   });
