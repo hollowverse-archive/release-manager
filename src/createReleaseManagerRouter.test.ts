@@ -139,6 +139,8 @@ describe('Release Manager', () => {
         expect.any(OutgoingMessage),
         expect.objectContaining({
           target: 'https://example.com/master',
+          requestedBranchName: undefined,
+          resolvedEnvironmentName: 'master',
         }),
       );
     });
@@ -175,6 +177,8 @@ describe('Release Manager', () => {
           expect.any(OutgoingMessage),
           expect.objectContaining({
             target: expect.stringMatching(/beta|master/),
+            requestedBranchName: undefined,
+            resolvedEnvironmentName: expect.stringMatching(/beta|master/),
           }),
         );
       });
@@ -280,6 +284,7 @@ describe('Release Manager', () => {
           expect.any(OutgoingMessage),
           expect.objectContaining({
             target: 'https://internal.example.com/branch/test',
+            requestedBranchName: 'test',
           }),
         );
       });
@@ -325,6 +330,8 @@ describe('Release Manager', () => {
           expect.any(OutgoingMessage),
           expect.objectContaining({
             target: 'https://example.com/fallback',
+            requestedBranchName: 'test',
+            resolvedEnvironmentName: 'fallback',
           }),
         );
       });
