@@ -1,7 +1,3 @@
-export function prefix(str: string) {
-  return `hollowverse-${str}`;
-}
+export const prefix = (str: string) => `hollowverse-${str}`;
 
-export function unprefix(str: string) {
-  return str.replace(/^hollowverse-/, '');
-}
+export const unprefix = (str: string) => str.replace(/^hollowverse-/, '');
