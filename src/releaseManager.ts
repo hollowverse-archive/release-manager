@@ -4,15 +4,15 @@ import { negate } from 'lodash';
 
 import { health, setIsHealthy } from './health';
 import { redirectToHttps } from './redirectToHttps';
-import { getEnvForBranchPreview } from './branchPreviewer/getEnvForBranchPreview';
-import { createGetEnvForTrafficSplitting } from './trafficSplitter/getEnvForTrafficSplitting';
+import { getEnvForBranchPreview } from './getEnvForBranchPreview';
+import { createGetEnvForTrafficSplitting } from './createGetEnvForTrafficSplitting';
 import { createReleaseManagerRouter } from './createReleaseManagerRouter';
 import { createProxyServer } from 'http-proxy';
 import {
   weightsByEnvironment,
+  urlsByEnvironment,
   defaultEnvName,
-} from './trafficSplitter/environments';
-import { urlsByEnvironment } from './trafficSplitter/urlsByEnvironment';
+} from './environments';
 
 process.on('unhandledRejection', () => {
   setIsHealthy(false);

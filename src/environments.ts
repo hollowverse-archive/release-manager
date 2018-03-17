@@ -1,6 +1,15 @@
-import { eb } from '../eb';
-import { envNames } from './environments';
-import { prefix, unprefix } from '../helpers/prefix';
+import { eb } from './eb';
+import { prefix, unprefix } from './helpers';
+
+/** This map MUST NOT contain weights <= 0 */
+export const weightsByEnvironment = Object.freeze({
+  master: 0.75,
+  beta: 0.25,
+});
+
+export const envNames = Object.keys(weightsByEnvironment);
+
+export const defaultEnvName = envNames[0];
 
 export const urlsByEnvironment = eb
   .describeEnvironments({

@@ -1,9 +1,12 @@
 import isBot from 'is-bot';
-import {
-  GetEnvForTrafficSplitting,
-  EnvDetails,
-} from '../createReleaseManagerRouter';
 import weighted from 'weighted';
+
+import { EnvDetails } from './types';
+
+export type GetEnvForTrafficSplitting = (
+  envName: string | undefined,
+  userAgent?: string,
+) => Promise<EnvDetails>;
 
 type CreateGetEnvForTrafficSplittingOptions<EnvName extends string> = {
   weightsByEnvironment: Record<EnvName, number>;

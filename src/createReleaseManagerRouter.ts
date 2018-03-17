@@ -2,6 +2,9 @@ import express from 'express';
 import { IncomingMessage, ServerResponse } from 'http';
 import { noop } from 'lodash';
 import cookieParser from 'cookie-parser';
+import { GetEnvForBranchPreview } from './getEnvForBranchPreview';
+import { GetEnvForTrafficSplitting } from './createGetEnvForTrafficSplitting';
+import { EnvDetails } from './types';
 
 const cdnNoCacheDirectives = 's-maxage=0, proxy-revalidate';
 
@@ -16,23 +19,11 @@ function isRequestWithContext(req: IncomingMessage): req is RequestWithContext {
   return 'context' in req;
 }
 
-export type EnvDetails = {
-  name: string;
-  url: string;
-};
-
-export type GetEnvForBranchPreview = (
-  branch: string,
-) => Promise<EnvDetails | undefined>;
-
-export type GetEnvForTrafficSplitting = (
-  envName: string | undefined,
-  userAgent?: string,
-) => Promise<EnvDetails>;
-
 export type CreateReleaseManagerRouterOptions = {
   trafficSplittingCookieName?: string;
+  trafficSplittingCookieMaxAge?: number;
   branchPreviewCookieName?: string;
+  branchPreviewCookieMaxAge?: number;
   getEnvForBranchPreview: GetEnvForBranchPreview;
   getEnvForTrafficSplitting: GetEnvForTrafficSplitting;
   isSetCookieAllowedForPath(path: string): boolean;
@@ -48,7 +39,6 @@ export type CreateReleaseManagerRouterOptions = {
   ): void;
 };
 
-// tslint:disable-next-line:max-func-body-length
 export const createReleaseManagerRouter = ({
   branchPreviewCookieName = 'branch',
   trafficSplittingCookieName = 'env',
@@ -56,6 +46,8 @@ export const createReleaseManagerRouter = ({
   getEnvForTrafficSplitting,
   forwardRequest,
   isSetCookieAllowedForPath,
+  trafficSplittingCookieMaxAge = 24 * 60 * 60 * 1000,
+  branchPreviewCookieMaxAge = 2 * 60 * 60 * 1000,
 }: CreateReleaseManagerRouterOptions) => {
   const router = express();
 
@@ -121,7 +113,7 @@ export const createReleaseManagerRouter = ({
       );
       if (env && shouldSetCookie) {
         res.cookie(branchPreviewCookieName, env.name, {
-          maxAge: 2 * 60 * 60 * 1000,
+          maxAge: branchPreviewCookieMaxAge,
           httpOnly: true,
           secure: true,
         });
@@ -137,7 +129,7 @@ export const createReleaseManagerRouter = ({
       if (shouldSetCookie) {
         res.clearCookie(branchPreviewCookieName);
         res.cookie(trafficSplittingCookieName, env.name, {
-          maxAge: 24 * 60 * 60 * 1000,
+          maxAge: trafficSplittingCookieMaxAge,
           httpOnly: true,
           secure: true,
         });

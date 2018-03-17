@@ -1,6 +1,7 @@
-// tslint:disable await-promise
+// tslint:disable await-promise no-implicit-dependencies
 import express, { Express } from 'express';
-import supertest, { SuperTest } from 'supertest'; // tslint:disable-line:no-implicit-dependencies
+import supertest, { SuperTest } from 'supertest';
+import cookie from 'cookie';
 import {
   createReleaseManagerRouter,
   CreateReleaseManagerRouterOptions,
@@ -35,10 +36,10 @@ const createTestContext = ({
   const agent = supertest(app);
   let _modifyProxyResponse: (req: IncomingMessage, res: ServerResponse) => void;
   const patchedForwardRequest: typeof forwardRequest = (req, res, opts) => {
-    const send = res.send.bind(res);
+    const _send = res.send.bind(res);
     res.send = () => {
       _modifyProxyResponse(req, res);
-      send();
+      _send();
 
       return res;
     };
@@ -188,6 +189,25 @@ describe('Release Manager', () => {
         });
 
         await context.agent.get('/path').expect('set-cookie', /env=beta/);
+      });
+
+      it('allows customizing max age of cookie', async () => {
+        const chance = new Chance();
+        const maxAgeInSeconds = chance.natural();
+
+        context = await createTestContext({
+          isSetCookieAllowedForPath: () => true,
+          trafficSplittingCookieMaxAge: maxAgeInSeconds * 1000,
+          getEnvForTrafficSplitting: async () => ({
+            url: 'https://example.com/master',
+            name: 'master',
+          }),
+        });
+
+        const cookies = (await context.agent.get('/path')).header['set-cookie'];
+        const parsedCookie = cookie.parse(cookies.join(';'));
+        expect(parsedCookie).toHaveProperty('Max-Age');
+        expect(parsedCookie['Max-Age']).toEqual(String(maxAgeInSeconds));
       });
     });
   });

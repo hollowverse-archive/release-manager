@@ -1,6 +1,8 @@
 // tslint:disable no-floating-promises no-implicit-dependencies
-import { createGetEnvForTrafficSplitting } from './getEnvForTrafficSplitting';
-import { GetEnvForTrafficSplitting } from '../createReleaseManagerRouter';
+import {
+  createGetEnvForTrafficSplitting,
+  GetEnvForTrafficSplitting,
+} from './createGetEnvForTrafficSplitting';
 import { times, uniq, countBy, mapValues } from 'lodash';
 import bluebird from 'bluebird';
 
