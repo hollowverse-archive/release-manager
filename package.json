@@ -16,25 +16,8 @@
     "clean": "rm -rf ./dist",
     "start": "node dist/releaseManager.js",
     "validate-filenames": "validate-filenames --config commonconfig.js",
-    "lint-staged": "lint-staged"
-  },
-  "jest": {
-    "globals": {
-      "ts-jest": {
-        "useBabelrc": true
-      }
-    },
-    "transform": {
-      "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
-    },
-    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx",
-      "json"
-    ]
+    "lint-staged": "lint-staged",
+    "coverage/report": "codecov -f ./coverage/lcov.info"
   },
   "license": "Unlicense",
   "homepage": "https://github.com/hollowverse/release-manager#readme",
@@ -88,6 +71,7 @@
     "@types/weighted": "^0.0.5",
     "babel-eslint": "^8.2.2",
     "bluebird": "^3.5.1",
+    "codecov": "^3.0.0",
     "cookie": "^0.3.1",
     "eslint": "^4.18.2",
     "eslint-config-airbnb": "^16.1.0",
