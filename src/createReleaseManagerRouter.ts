@@ -1,7 +1,7 @@
-import express from 'express';
+import express, { RequestHandler } from 'express';
 import { IncomingMessage, ServerResponse } from 'http';
-import { noop } from 'lodash';
 import cookieParser from 'cookie-parser';
+import { noop } from 'lodash';
 import { GetEnvForBranchPreview } from './getEnvForBranchPreview';
 import { GetEnvForTrafficSplitting } from './createGetEnvForTrafficSplitting';
 import { EnvDetails } from './types';
@@ -20,13 +20,50 @@ function isRequestWithContext(req: IncomingMessage): req is RequestWithContext {
 }
 
 export type CreateReleaseManagerRouterOptions = {
+  /** The name of the cookie to use to stay on the same environment between sessions */
   trafficSplittingCookieName?: string;
+
+  /**
+   * Time, in milliseconds, after which the traffic splitting cookie expires and Release
+   * Manager picks a new environment for the user
+   */
   trafficSplittingCookieMaxAge?: number;
+
+  /** The name of the cookie to use to stay on the preview branch between sessions */
   branchPreviewCookieName?: string;
+
+  /**
+   * Time, in milliseconds, after which the branch cookie expires and Release Manager
+   * falls back to using the traffic splitting cookie (if it exists) or picks a new, public
+   * environment for the user.
+   */
   branchPreviewCookieMaxAge?: number;
+
+  /** Given a requested branch name, this function should return the name and the URL
+   * of that branch if it exists, or `undefined` if it does not.
+   */
   getEnvForBranchPreview: GetEnvForBranchPreview;
+
+  /**
+   * Given a requested environment name and a user agent string, this function
+   * should return the name and URL of that function if and only if:
+   * 1. an environment with that name actually exists
+   * 2. the environment is public
+   * Otherwise, this function should fall back to one of the available public
+   * environments.
+   * This function should not throw any errors.
+   */
   getEnvForTrafficSplitting: GetEnvForTrafficSplitting;
+
   isSetCookieAllowedForPath(path: string): boolean;
+
+  /**
+   * A function that proxies the request to the target environment and modifies
+   * the response to match the response of the target environment.
+   * If further modifications to the proxy response are required before
+   * the response is sent to the user, they should be performed in
+   * `modifyProxyResponse` which is returned by `createReleaseManagerRouter`
+   */
   forwardRequest(
     req: express.Request,
     res: express.Response,
@@ -39,6 +76,25 @@ export type CreateReleaseManagerRouterOptions = {
   ): void;
 };
 
+export type CreateReleaseManagerReturnType = {
+  router: RequestHandler;
+  /** A _synchronous_ function that modifies the response
+   * returned from the target environment before the request is sent to the user.
+   * It rewrites the `Cache-Control` header of the incoming response.
+   * It should be attached to a suitable event on the proxy server that is used
+   * to forward the request to the target environment.
+   * @example
+   * ```typescript
+   * import proxyServer from 'http-proxy';
+   * const proxyServer = createProxyServer();
+   * const { router, modifyProxyResponse } = createReleaseManagerRouter({ ... });
+   * ...
+   * proxyServer.on('proxyReq', modifyProxyResponse);
+   * ```
+   */
+  modifyProxyResponse(req: IncomingMessage, res: ServerResponse): void;
+};
+
 export const createReleaseManagerRouter = ({
   branchPreviewCookieName = 'branch',
   trafficSplittingCookieName = 'env',
@@ -48,7 +104,7 @@ export const createReleaseManagerRouter = ({
   isSetCookieAllowedForPath,
   trafficSplittingCookieMaxAge = 24 * 60 * 60 * 1000,
   branchPreviewCookieMaxAge = 2 * 60 * 60 * 1000,
-}: CreateReleaseManagerRouterOptions) => {
+}: CreateReleaseManagerRouterOptions): CreateReleaseManagerReturnType => {
   const router = express();
 
   router.use(cookieParser());
@@ -82,7 +138,7 @@ export const createReleaseManagerRouter = ({
   router.use(async (req, res) => {
     let env: EnvDetails | void;
 
-    // When a response is cached with `Cache-Control: immutable` (see above),
+    // When a response is cached with `Cache-Control: immutable`,
     // the browser will not even send a request to check if the resource
     // has been updated. So if for example the user was on the `new-app` branch
     // and they are switched to `master`, and if both branches has shared assets, the
@@ -92,7 +148,7 @@ export const createReleaseManagerRouter = ({
     // the environment which was just routed to `master` will be set again to
     // `branch=new-app` when the asset is read from disk. So immutable caching
     // is causing the environment to be reset again to the branch that the user
-    // was on when he first requested that asset.
+    // was on when the first requested that asset.
     // We should _not_ set the `Set-Cookie` header on static assets.
 
     // See https://github.com/hollowverse/hollowverse/issues/287

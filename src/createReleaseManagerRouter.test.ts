@@ -5,15 +5,16 @@ import cookie from 'cookie';
 import {
   createReleaseManagerRouter,
   CreateReleaseManagerRouterOptions,
+  CreateReleaseManagerReturnType,
 } from './createReleaseManagerRouter';
-import { ServerResponse, IncomingMessage, OutgoingMessage } from 'http';
+import { IncomingMessage, OutgoingMessage } from 'http';
 import Chance from 'chance';
 
 type TestContext = Readonly<
   CreateReleaseManagerRouterOptions & {
     app: Express;
     agent: SuperTest<supertest.Test>;
-    modifyProxyResponse(req: IncomingMessage, res: ServerResponse): void;
+    modifyProxyResponse: CreateReleaseManagerReturnType['modifyProxyResponse'];
   }
 >;
 
@@ -34,7 +35,7 @@ const createTestContext = ({
 }: Partial<CreateReleaseManagerRouterOptions> = {}): TestContext => {
   const app = express();
   const agent = supertest(app);
-  let _modifyProxyResponse: (req: IncomingMessage, res: ServerResponse) => void;
+  let _modifyProxyResponse: CreateReleaseManagerReturnType['modifyProxyResponse'];
   const patchedForwardRequest: typeof forwardRequest = (req, res, opts) => {
     const _send = res.send.bind(res);
     res.send = () => {
@@ -310,7 +311,7 @@ describe('Release Manager', () => {
       });
     });
 
-    describe('If the request branch does not exist', () => {
+    describe('If the requested branch does not exist', () => {
       beforeEach(async () => {
         context = await createTestContext({
           getEnvForBranchPreview: async () => undefined,
