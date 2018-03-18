@@ -47,7 +47,7 @@ export type CreateReleaseManagerRouterOptions = {
 
   /**
    * Given a requested environment name and a user agent string, this function
-   * should return the name and URL of that function if and only if:
+   * should return the name and URL of that environment if and only if:
    * 1. an environment with that name actually exists
    * 2. the environment is public
    * Otherwise, this function should fall back to one of the available public
