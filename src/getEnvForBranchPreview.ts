@@ -1,6 +1,10 @@
-import { EnvDetails } from '../typings/environments';
-import { eb } from '../eb';
-import { prefix, unprefix } from '../helpers/prefix';
+import { eb } from './eb';
+import { prefix, unprefix } from './helpers';
+import { EnvDetails } from './types';
+
+export type GetEnvForBranchPreview = (
+  branch: string,
+) => Promise<EnvDetails | undefined>;
 
 /**
  * For a given branch name (e.g. read from a cookie or query string), this function
@@ -8,9 +12,9 @@ import { prefix, unprefix } from '../helpers/prefix';
  * the name and the URL of that environment. If no matching environment is found,
  * or if the environment was terminated, this function returns `undefined`.
  */
-const getEnvForBranchPreview = async (
+const getEnvForBranchPreview: GetEnvForBranchPreview = async (
   branch: string,
-): Promise<EnvDetails | undefined> => {
+) => {
   const { Environments } = await eb
     .describeEnvironments({
       ApplicationName: 'Hollowverse',

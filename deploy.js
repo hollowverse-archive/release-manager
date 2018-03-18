@@ -9,6 +9,9 @@ const {
 const {
   executeCommands,
 } = require('@hollowverse/common/helpers/executeCommands');
+const {
+  executeCommandsInParallel,
+} = require('@hollowverse/common/helpers/executeCommandsInParallel');
 const { writeJsonFile } = require('@hollowverse/common/helpers/writeJsonFile');
 const { createZipFile } = require('@hollowverse/common/helpers/createZipFile');
 
@@ -32,7 +35,12 @@ const secrets = [
 const ebEnvironmentName = `${PROJECT}-${BRANCH}`;
 
 async function main() {
-  const buildCommands = ['yarn test', 'yarn build'];
+  const buildCommands = [
+    'yarn test',
+    async () => {
+      await executeCommandsInParallel(['yarn coverage/report', 'yarn build']);
+    },
+  ];
   const deploymentCommands = [
     () =>
       writeJsonFile('env.json', {
