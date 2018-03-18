@@ -39,7 +39,8 @@ export type CreateReleaseManagerRouterOptions = {
    */
   branchPreviewCookieMaxAge?: number;
 
-  /** Given a requested branch name, this function should return the name and the URL
+  /**
+   * Given a requested branch name, this function should return the name and the URL
    * of that branch if it exists, or `undefined` if it does not.
    */
   getEnvForBranchPreview: GetEnvForBranchPreview;
@@ -60,9 +61,10 @@ export type CreateReleaseManagerRouterOptions = {
   /**
    * A function that proxies the request to the target environment and modifies
    * the response to match the response of the target environment.
-   * If further modifications to the proxy response are required before
-   * the response is sent to the user, they should be performed in
+   * Further modifications to the proxy response are required before
+   * the response is sent to the user, these are performed in
    * `modifyProxyResponse` which is returned by `createReleaseManagerRouter`
+   * and which should be attached to the corresponding proxy server event.
    */
   forwardRequest(
     req: express.Request,
@@ -89,7 +91,7 @@ export type CreateReleaseManagerReturnType = {
    * const proxyServer = createProxyServer();
    * const { router, modifyProxyResponse } = createReleaseManagerRouter({ ... });
    * ...
-   * proxyServer.on('proxyReq', modifyProxyResponse);
+   * proxyServer.on('proxyReq', (_, req, res) => { modifyProxyResponse(req, res); });
    * ```
    */
   modifyProxyResponse(req: IncomingMessage, res: ServerResponse): void;
