@@ -17,7 +17,8 @@
     "start": "node dist/releaseManager.js",
     "validate-filenames": "validate-filenames --config commonconfig.js",
     "lint-staged": "lint-staged",
-    "coverage/report": "codecov -f ./coverage/lcov.info"
+    "coverage/report": "codecov -f ./coverage/lcov.info",
+    "deploy": "node ./deploy.js"
   },
   "license": "Unlicense",
   "homepage": "https://github.com/hollowverse/release-manager#readme",
